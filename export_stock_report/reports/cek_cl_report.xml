@@ -1,0 +1,124 @@
+<odoo>
+    <template id="report_cek_cl">
+        <t t-call="web.external_layout">
+            <main class="page">
+
+                <style>
+                    table.report-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 12px;
+                    }
+                    table.report-table th,
+                    table.report-table td {
+                        border: 1px solid #000;
+                        padding: 4px 6px;
+                    }
+                    table.report-table th {
+                        background-color: #f2f2f2;
+                        text-align: center;
+                        font-weight: bold;
+                    }
+                    h4 {
+                        margin-top: 15px;
+                        margin-bottom: 5px;
+                    }
+                </style>
+
+                <h3 style="text-align:center; m/argin-bottom:20px;">
+                    TOTAL STOK ARANG LOKAL <br/>
+                    per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
+
+                </h3>
+
+                <t t-foreach="report_data" t-as="line">
+                    <h4><t t-esc="line['product']"/></h4>
+
+                    <table class="report-table">
+                      <thead>
+                          <tr>
+                              <th rowspan="2">Warehouse</th>
+
+                              <t t-foreach="line['uoms']" t-as="u">
+                                  <th colspan="2" style="text-align:center;"><t t-esc="u.name"/></th>
+                              </t>
+
+                              <th rowspan="2">Total</th>
+                          </tr>
+
+                          <tr>
+                              <t t-foreach="line['uoms']" t-as="u">
+                                  <th>BOX</th>
+                                  <th>KG</th>
+                              </t>
+                          </tr>
+                      </thead>
+
+                      <tbody>
+                          <t t-foreach="line['warehouse_lines']" t-as="wh_line">
+                              <tr>
+                                  <td><t t-esc="wh_line['warehouse']"/></td>
+
+                                  <t t-foreach="line['uoms']" t-as="u">
+                                      <!-- BOX -->
+                                      <td>
+                                          <t t-esc="'{:,.0f}'.format(
+                                              wh_line['uoms'].get(u, {}).get('box', 0)
+                                          ).replace(',', '.')"/>
+                                      </td>
+
+                                      <!-- KG -->
+                                      <td>
+                                          <t t-esc="'{:,.0f}'.format(
+                                              wh_line['uoms'].get(u, {}).get('kg', 0)
+                                          ).replace(',', '.')"/>
+                                      </td>
+                                  </t>
+
+                                  <!-- TOTAL per Warehouse -->
+                                  <td>
+                                      <t t-esc="'{:,.0f}'.format(
+                                          wh_line['total']
+                                      ).replace(',', '.')"/>
+                                  </td>
+                              </tr>
+                          </t>
+                      </tbody>
+
+                      <tfoot>
+                          <tr style="font-weight:bold;">
+                              <td>Total</td>
+
+                              <t t-foreach="line['uoms']" t-as="u">
+                                  <!-- Total BOX per UOM -->
+                                  <td>
+                                      <t t-esc="'{:,.0f}'.format(
+                                          line['total_by_uom'][u]['box']
+                                      ).replace(',', '.')"/>
+                                  </td>
+
+                                  <!-- Total KG per UOM -->
+                                  <td>
+                                      <t t-esc="'{:,.0f}'.format(
+                                          line['total_by_uom'][u]['kg']
+                                      ).replace(',', '.')"/>
+                                  </td>
+                              </t>
+
+                              <!-- Total KG keseluruhan -->
+                              <td>
+                                  <t t-esc="'{:,.0f}'.format(
+                                      line['total_kg']
+                                  ).replace(',', '.')"/>
+                              </td>
+                          </tr>
+                      </tfoot>
+                  </table>
+
+                    <br/>
+                </t>
+
+            </main>
+        </t>
+    </template>
+</odoo>

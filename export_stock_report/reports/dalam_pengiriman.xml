@@ -1,0 +1,139 @@
+<odoo>
+  <template id="stock_report_pengiriman">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="wizard">
+
+        <div class="page" style="font-family:Arial, sans-serif; color:#000;">
+          <h2 style="text-align:center; font-weight:bold; margin-bottom:5px;">
+            TOTAL STOK BOX EXPORT DALAM PERJALANAN
+          </h2>
+          <h3 style="text-align:center; margin-top:0;">
+            per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(wizard.end_date), '%Y-%m-%d'))"/>
+          </h3>
+
+          <t t-foreach="result.items()" t-as="wh">
+            <t t-set="warehouse" t-value="wh[0]"/>
+            <t t-set="data_warehouse" t-value="wh[1]"/>
+
+            <h4 style="margin-top:25px; text-transform:uppercase; border-bottom:2px solid #444;">
+              WAREHOUSE <t t-esc="warehouse"/>
+            </h4>
+
+            <!-- ====================== TABLE DETAIL ====================== -->
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                font-size:12px;
+                margin-top:8px;
+              ">
+              <thead>
+                <tr style="background-color:#d9d9d9; text-align:center; border:1px solid #999;">
+                  <th style="padding:4px; border:1px solid #999;">No</th>
+                  <th style="padding:4px; border:1px solid #999;">No. Cont</th>
+                  <th style="padding:4px; border:1px solid #999;">ETD</th>
+                  <th style="padding:4px; border:1px solid #999;">ETA</th>
+                  <th style="padding:4px; border:1px solid #999;">Design</th>
+                  <th style="padding:4px; border:1px solid #999;">Grade</th>
+                  <th style="padding:4px; border:1px solid #999;">Qty</th>
+                  <th style="padding:4px; border:1px solid #999;">Tujuan</th>
+                  <th style="padding:4px; border:1px solid #999;">Ket</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-set="no" t-value="1"/>
+                <t t-set="total_qty" t-value="0"/>   <!-- Tambahkan ini -->
+                
+                <t t-foreach="data_warehouse.items()" t-as="design_item">
+                  <t t-set="design" t-value="design_item[0]"/>
+                  <t t-set="grade_dict" t-value="design_item[1]"/>
+                  <t t-foreach="grade_dict.items()" t-as="grade_item">
+                    <t t-set="grade" t-value="grade_item[0]"/>
+                    <t t-set="lines" t-value="grade_item[1]"/>
+
+                    <t t-foreach="lines" t-as="line">
+                      <tr t-attf-style="background-color: #f9f9f9">
+                        <td style="text-align:center; border:1px solid #ccc; padding:3px;"><t t-esc="no"/></td>
+                        <td style="border:1px solid #ccc; padding:3px;"><t t-esc="line['origin']"/></td>
+                        <td style="text-align:center; border:1px solid #ccc; padding:3px;"></td>
+                        <td style="text-align:center; border:1px solid #ccc; padding:3px;"></td>
+                        <td style="border:1px solid #ccc; padding:3px;"><t t-esc="line['product']"/></td>
+                        <td style="border:1px solid #ccc; padding:3px;"><t t-esc="line['grade']"/></td>
+                        <td style="text-align:right; border:1px solid #ccc; padding:3px;">
+                          <t t-esc="'{:,.0f}'.format(line['qty'])"/>
+                        </td>
+                        <td style="border:1px solid #ccc; padding:3px;"><t t-esc="line['destination']"/></td>
+                        <td style="border:1px solid #ccc; padding:3px;"><t t-esc="line['ket']"/></td>
+                      </tr>
+                      <t t-set="total_qty" t-value="total_qty + line['qty']"/>  <!-- Tambahkan akumulasi total -->
+                      <t t-set="no" t-value="no + 1"/>
+                    </t>
+                  </t>
+                </t>
+
+                <!-- Total per warehouse -->
+                <tr style="font-weight:bold; background-color:#f0f0f0; border-top:2px solid #666;">
+                  <td colspan="6" style="text-align:center; border:1px solid #999; padding:4px;">TOTAL</td>
+                  <td style="text-align:right; border:1px solid #999; padding:4px;">
+                    <t t-esc="'{:,.0f}'.format(total_qty)"/>
+                  </td>
+                  <td colspan="2" style="border:1px solid #999; padding:4px;"></td>
+                </tr>
+              </tbody>
+
+            </table>
+
+            <!-- ====================== TABLE TOTAL PER DESIGN ====================== -->
+            <div style="margin-top:20px;">
+              <h5 style="font-weight:bold; margin-bottom:5px;">TOTAL / DESIGN</h5>
+              <table style="
+                  width:60%;
+                  border-collapse:collapse;
+                  font-size:12px;
+                  margin-top:5px;
+                ">
+                <thead>
+                  <tr style="background-color:#d9d9d9; text-align:center; border:1px solid #999;">
+                    <th style="padding:4px; border:1px solid #999;">DESGN / GRD</th>
+                    <th style="padding:4px; border:1px solid #999;">BOX</th>
+                    <th style="padding:4px; border:1px solid #999;">CONT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-set="grand_box" t-value="0"/>
+                  <t t-set="grand_cont" t-value="0"/>
+
+                  <t t-foreach="total_per_design[warehouse]" t-as="tline">
+                    <tr t-attf-style="background-color: #f9f9f9">
+                      <td style="border:1px solid #ccc; padding:3px;"><t t-esc="tline['design']"/></td>
+                      <td style="text-align:right; border:1px solid #ccc; padding:3px;">
+                        <t t-esc="'{:,.0f}'.format(tline['total_box'])"/>
+                      </td>
+                      <td style="text-align:right; border:1px solid #ccc; padding:3px;">
+                        <t t-esc="'{:.2f}'.format(tline['total_cont'])"/>
+                      </td>
+                    </tr>
+                    <t t-set="grand_box" t-value="grand_box + tline['total_box']"/>
+                    <t t-set="grand_cont" t-value="grand_cont + tline['total_cont']"/>
+                  </t>
+
+                  <!-- Total akhir per warehouse -->
+                  <tr style="font-weight:bold; background-color:#f0f0f0; border-top:2px solid #666;">
+                    <td style="text-align:center; border:1px solid #999; padding:4px;">TOTAL</td>
+                    <td style="text-align:right; border:1px solid #999; padding:4px;">
+                      <t t-esc="'{:,.0f}'.format(grand_box)"/>
+                    </td>
+                    <td style="text-align:right; border:1px solid #999; padding:4px;">
+                      <t t-esc="'{:.2f}'.format(grand_cont)"/>
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+            </div>
+          </t>
+        </div>
+
+      </t>
+    </t>
+  </template>
+</odoo>

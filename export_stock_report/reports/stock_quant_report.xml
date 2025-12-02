@@ -1,0 +1,235 @@
+<odoo>
+    <template id="stock_report_template">
+        <t t-call="web.html_container">
+            <div class="page">
+                <t t-foreach="results.items()" t-as="sp">
+                    <t t-set="salesperson" t-value="sp[0]"/>
+                    <t t-set="customers" t-value="sp[1]"/>
+                    <t t-call="web.external_layout">
+                        
+                        <div t-att-style="'background:%s; color:#fff; text-align:center; font-weight:bold; padding:4px;' % bg_color">
+                            REPORT PERSEDIAAN BARANG <t t-esc="salesperson"/> <br/>
+                            PER TANGGAL <t t-esc="docs.end_date.strftime('%d-%m-%Y')"/>
+                        </div>
+
+                        <t t-foreach="customers.items()" t-as="cust">
+                            <t t-set="cust_name" t-value="cust[0]"/>
+                            <t t-set="prod_data" t-value="cust[1]"/>
+
+                            <!-- <div style="page-break-before: always;"></div> -->
+                            <h4 style="text-align:center;">CUSTOMER : <t t-esc="cust_name"/></h4>
+
+                            <table border="1" style="width:100%;border-collapse:collapse;text-align:center;font-size:11px;">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">Product</th>
+                                        <th rowspan="2">Grade</th>
+                                        <t t-foreach="warehouses" t-as="wh">
+                                            <th colspan="2"><t t-esc="wh"/></th>
+                                        </t>
+                                        <th colspan="2">Total</th>
+                                    </tr>
+                                    <tr>
+                                        <t t-foreach="warehouses" t-as="wh">
+                                            <th>Box</th>
+                                            <th>Cont</th>
+                                        </t>
+                                        <th>Box</th>
+                                        <th>Cont</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filter produk -->
+                                    <t t-set="products_in_cust" t-value="[p for p in products if p in prod_data]"/>
+
+                                    <!-- Inisialisasi -->
+                                    <t t-set="prev_base" t-value="''"/>
+                                    <t t-set="subtotal_box" t-value="0"/>
+                                    <t t-set="subtotal_cont" t-value="0"/>
+                                    <t t-set="wh_totals" t-value="dict((wh, {'box': 0, 'cont': 0}) for wh in warehouses)"/>
+
+                                    <!-- Loop produk -->
+                                    <t t-foreach="products_in_cust" t-as="prod">
+                                        <t t-set="base_name" t-value="prod.split('(')[0].strip()"/>
+                                        <t t-set="total_box" t-value="0"/>
+                                        <t t-set="total_cont" t-value="0"/>
+                                        <t t-set="grade" t-value="None"/>
+                                        <t t-set="name_product" t-value="None"/>
+
+                                        <!-- ambil info produk -->
+                                        <t t-foreach="warehouses" t-as="wh" t-if="prod_data.get(prod, {}).get(wh)">
+                                            <t t-set="grade" t-value="prod_data[prod][wh].get('grade')"/>
+                                            <t t-set="name_product" t-value="prod_data[prod][wh].get('name_product')"/>
+                                            <t t-break="True"/>
+                                        </t>
+
+                                        <t t-if="name_product">
+                                            <tr>
+                                                <td style="text-align:left; padding-left:6px;">
+                                                    <t t-esc="base_name"/>
+                                                </td>
+                                                <td><t t-esc="grade or '-'"/></td>
+
+                                                <!-- isi per warehouse -->
+                                                <t t-foreach="warehouses" t-as="wh">
+                                                    <t t-set="vals" t-value="prod_data.get(prod, {}).get(wh, {})"/>
+                                                    <t t-set="val_box" t-value="vals.get('box', 0)"/>
+                                                    <t t-set="val_cont" t-value="vals.get('cont', 0)"/>
+
+                                                    <td><t t-esc="'%d' % val_box"/></td>
+                                                    <td><t t-esc="'%.2f' % val_cont"/></td>
+
+                                                    <!-- Tambahkan ke total varian -->
+                                                    <t t-set="total_box" t-value="total_box + val_box"/>
+                                                    <t t-set="total_cont" t-value="total_cont + val_cont"/>
+
+                                                    <!-- Tambahkan ke subtotal warehouse -->
+                                                    <t t-set="old_box" t-value="wh_totals[wh]['box']"/>
+                                                    <t t-set="old_cont" t-value="wh_totals[wh]['cont']"/>
+                                                    <t t-set="wh_totals" t-value="dict(list(wh_totals.items()) + [(wh, {'box': old_box + val_box, 'cont': old_cont + val_cont})])"/>
+                                                </t>
+
+                                                <!-- total varian -->
+                                                <td><t t-esc="'%d' % total_box"/></td>
+                                                <td><t t-esc="'%.2f' % total_cont"/></td>
+
+                                                <!-- total produk -->
+                                                <t t-set="subtotal_box" t-value="subtotal_box + total_box"/>
+                                                <t t-set="subtotal_cont" t-value="subtotal_cont + total_cont"/>
+                                            </tr>
+                                        </t>
+
+                                        <!-- Cek akhir grup produk -->
+                                        <t t-set="is_last_of_group"
+                                        t-value="(products_in_cust.index(prod) == len(products_in_cust) - 1) or (products_in_cust[products_in_cust.index(prod) + 1].split('(')[0].strip() != base_name)"/>
+
+                                        <t t-if="is_last_of_group">
+                                            <tr style="font-weight:bold; background-color:#f0f0f0;">
+                                                <td colspan="2" style="text-align:left; padding-left:6px;">
+                                                    TOTAL <t t-esc="base_name"/>
+                                                </td>
+
+                                                <!-- total per warehouse -->
+                                                <t t-foreach="warehouses" t-as="wh">
+                                                    <td><t t-esc="'%d' % wh_totals[wh]['box']"/></td>
+                                                    <td><t t-esc="'%.2f' % wh_totals[wh]['cont']"/></td>
+                                                </t>
+
+                                                <!-- total keseluruhan -->
+                                                <td><t t-esc="'%d' % subtotal_box"/></td>
+                                                <td><t t-esc="'%.2f' % subtotal_cont"/></td>
+                                            </tr>
+
+                                            <!-- reset subtotal -->
+                                            <t t-set="subtotal_box" t-value="0"/>
+                                            <t t-set="subtotal_cont" t-value="0"/>
+                                            <t t-set="wh_totals" t-value="dict((wh, {'box': 0, 'cont': 0}) for wh in warehouses)"/>
+                                        </t>
+
+                                        <t t-set="prev_base" t-value="base_name"/>
+                                    </t>
+                                    <tr style="font-weight:bold;">
+                                            <td colspan="2">GRAND TOTAL</td>
+                                            <t t-foreach="warehouses" t-as="wh">
+                                                <td>
+                                                <t t-esc="'%d' % customer_totals.get(salesperson, {}).get(cust_name, {}).get(wh, {}).get('box', 0)"/>
+                                                </td>
+                                                <td>
+                                                <t t-esc="'%.2f' % customer_totals.get(salesperson, {}).get(cust_name, {}).get(wh, {}).get('cont', 0)"/>
+                                                </td>
+                                            </t>
+                                            <td>
+                                                <t t-esc="'%d' % customer_totals.get(salesperson, {}).get(cust_name, {}).get('total', {}).get('box', 0)"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="'%.2f' % customer_totals.get(salesperson, {}).get(cust_name, {}).get('total', {}).get('cont', 0)"/>
+                                            </td>
+                                        </tr>
+                                </tbody>
+
+
+                            </table>
+                            <br/>
+                        </t>
+                    </t>
+                </t>
+            </div>
+
+            <!-- Halaman Total Keseluruhan Per Warehouse (GRAND TOTAL) -->
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <div style="background:#444; color:#fff; text-align:center; font-weight:bold; padding:6px;">
+                        GRAND TOTAL PER CUSTOMER<br/>
+                        PER TANGGAL <t t-esc="docs.end_date.strftime('%d-%m-%Y')"/>
+                    </div>
+
+                    <table border="1" style="width:100%;border-collapse:collapse;text-align:center;font-size:11px;margin-top:10px;">
+                        <thead>
+                        <tr>
+                            <th rowspan="2">Salesperson</th>
+                            <th rowspan="2">Customer</th>
+                            <t t-foreach="warehouses" t-as="wh">
+                            <th colspan="2"><t t-esc="wh"/></th>
+                            </t>
+                            <th colspan="2">Total</th>
+                        </tr>
+                        <tr>
+                            <t t-foreach="warehouses" t-as="wh">
+                            <th>Box</th>
+                            <th>Cont</th>
+                            </t>
+                            <th>Box</th>
+                            <th>Cont</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <t t-foreach="results.items()" t-as="sp">
+                            <t t-set="salesperson" t-value="sp[0]"/>
+                            <t t-set="customers" t-value="sp[1]"/>
+
+                            <t t-foreach="customers.items()" t-as="cust">
+                            <t t-set="cust_name" t-value="cust[0]"/>
+
+                            <tr>
+                                <td><t t-esc="salesperson"/></td>
+                                <td><t t-esc="cust_name"/></td>
+
+                                <t t-foreach="warehouses" t-as="wh">
+                                <td><t t-esc="'%d' % customer_totals.get(salesperson, {}).get(cust_name, {}).get(wh, {}).get('box', 0)"/></td>
+                                <td><t t-esc="'%.2f' % customer_totals.get(salesperson, {}).get(cust_name, {}).get(wh, {}).get('cont', 0)"/></td>
+                                </t>
+
+                                <td><t t-esc="'%d' % customer_totals.get(salesperson, {}).get(cust_name, {}).get('total', {}).get('box', 0)"/></td>
+                                <td><t t-esc="'%.2f' % customer_totals.get(salesperson, {}).get(cust_name, {}).get('total', {}).get('cont', 0)"/></td>
+                            </tr>
+                            </t>
+
+                            <!-- 🧮 Total per Salesperson -->
+                            <tr style="font-weight:bold;background:#ddd;">
+                            <td colspan="2" style="text-align:left;padding-left:5px;">Total <t t-esc="salesperson"/></td>
+                            <t t-foreach="warehouses" t-as="wh">
+                                <td><t t-esc="'%d' % salesperson_totals.get(salesperson, {}).get(wh, {}).get('box', 0)"/></td>
+                                <td><t t-esc="'%.2f' % salesperson_totals.get(salesperson, {}).get(wh, {}).get('cont', 0)"/></td>
+                            </t>
+                            <td><t t-esc="'%d' % salesperson_totals.get(salesperson, {}).get('total', {}).get('box', 0)"/></td>
+                            <td><t t-esc="'%.2f' % salesperson_totals.get(salesperson, {}).get('total', {}).get('cont', 0)"/></td>
+                            </tr>
+                        </t>
+                        <tr style="font-weight:bold;background:#bbb;">
+                                <td colspan="2" style="text-align:left;padding-left:5px;">GRAND TOTAL</td>
+                                <t t-foreach="warehouses" t-as="wh">
+                                    <td><t t-esc="'%d' % grand_totals_per_wh.get(wh, {}).get('box', 0)"/></td>
+                                    <td><t t-esc="'%.2f' % grand_totals_per_wh.get(wh, {}).get('cont', 0)"/></td>
+                                </t>
+                                <td><t t-esc="'%d' % grand_totals_per_wh.get('total', {}).get('box', 0)"/></td>
+                                <td><t t-esc="'%.2f' % grand_totals_per_wh.get('total', {}).get('cont', 0)"/></td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
