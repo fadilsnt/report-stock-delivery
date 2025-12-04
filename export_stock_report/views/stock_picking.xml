@@ -6,8 +6,8 @@
         <field name="arch" type="xml">
             <!-- Tambah field sales_person_id di group yang ada user_id -->
             <xpath expr="//field[@name='origin']" position="after">
-                <field name="sales_person_id" invisible="1"/>
-                <field name="person_ids" readonly="state == 'done'"/>
+                <field name="sales_person_ids" invisible="1"/>
+                <field name="person_ids" readonly="state != 'draft'"/>
             </xpath>
         </field>
     </record>
