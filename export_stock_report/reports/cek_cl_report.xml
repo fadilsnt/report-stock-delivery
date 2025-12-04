@@ -1,6 +1,16 @@
 <odoo>
     <template id="report_cek_cl">
         <t t-call="web.external_layout">
+            <t t-if="kategori == 'LOKAL'">
+                    <t t-call="export_stock_report.report_cek_cl_lokal"/>
+            </t>
+            <t t-elif="kategori == 'EXPORT'">
+                <t t-call="export_stock_report.report_cek_cl_export"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_cek_cl_lokal">
             <main class="page">
 
                 <style>
@@ -119,6 +129,84 @@
                 </t>
 
             </main>
-        </t>
     </template>
+
+    <template id="report_cek_cl_export">
+        <main class="page" style="font-size:12px;">
+
+            <!-- Ambil hanya 1 row: index 0 -->
+            <t t-set="row" t-value="report_data and report_data[0]"/>
+
+            <t t-set="uoms" t-value="row['uoms']"/>
+            <t t-set="grades" t-value="row['grades']"/>
+
+            <table style="width:100%; border-collapse: collapse;">
+
+                <!-- HEADER LEVEL 1 -->
+                <tr style="background:#ddd; font-weight:bold;">
+                    <th rowspan="3" style="text-align:center; padding:6px; border:1px solid #000; width:25%;">
+                        PABRIK
+                    </th>
+
+                    <th t-att-colspan="row['colspan']"
+                        style="text-align:center; padding:6px; border:1px solid #000;">
+                        EXPORT
+                    </th>
+
+                    <th rowspan="3" style="text-align:center; padding:6px; border:1px solid #000; width:12%;">
+                        TOTAL
+                    </th>
+                </tr>
+
+                <!-- HEADER UOM -->
+                <tr style="background:#eee; font-weight:bold;">
+                    <t t-foreach="uoms" t-as="uom">
+                        <th t-att-colspan="len(grades)"
+                            style="text-align:center; padding:6px; border:1px solid #000;">
+                            <t t-esc="uom"/>
+                        </th>
+                    </t>
+                </tr>
+
+                <!-- HEADER GRADE -->
+                <tr style="background:#eee; font-weight:bold;">
+                    <t t-foreach="uoms" t-as="uom">
+                        <t t-foreach="grades" t-as="grade">
+                            <th style="text-align:center; padding:6px; border:1px solid #000;">
+                                <t t-esc="grade"/>
+                            </th>
+                        </t>
+                    </t>
+                </tr>
+
+                <!-- BODY -->
+                <t t-foreach="row['warehouse_lines']" t-as="wh" t-foreach-index="i">
+                    <tr>
+
+                        <!-- Warehouse -->
+                        <td style="padding:6px; border:1px solid #000;">
+                            <t t-esc="wh['warehouse']"/>
+                        </td>
+
+                        <!-- GRID VALUES -->
+                        <t t-foreach="uoms" t-as="uom">
+                            <t t-foreach="grades" t-as="grade">
+                                <td style="text-align:right; padding:6px; border:1px solid #000;">
+                                    <t t-esc="wh['uoms'].get(uom, {}).get(grade, 0)"/>
+                                </td>
+                            </t>
+                        </t>
+
+                        <!-- TOTAL -->
+                        <td style="text-align:right; padding:6px; border:1px solid #000;">
+                            <t t-esc="wh['total']"/>
+                        </td>
+                    </tr>
+                </t>
+            </table>
+        </main>
+    </template>
+
+
+
 </odoo>
