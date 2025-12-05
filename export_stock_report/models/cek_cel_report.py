@@ -92,74 +92,103 @@ class ReportCekCL(models.AbstractModel):
         # ===============   KATEGORI EXPORT (BARU)       =================
         # ================================================================
         elif kategori == "EXPORT":
+
+            quants = self.env['stock.quant'].search([
+                ('product_id', 'in', products.ids),
+                ('location_id.usage', '=', 'internal'),
+            ])
+
             merged_map = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
-            used_uoms = set()
+            used_boxes = set()
             used_grades = set()
 
             for product in products:
 
-                # grade product
-                grade_values = product.product_template_variant_value_ids.filtered(
-                    lambda v: v.attribute_id.name and v.attribute_id.name.strip().lower() == "grade"
-                ).mapped('name')
+                # 1) BOX dari TEMPLATE
+                tmpl = product.product_tmpl_id
+                tmpl_attr_lines = tmpl.attribute_line_ids
 
-                if not grade_values:
+                box_line = tmpl_attr_lines.filtered(
+                    lambda l: l.attribute_id.name.strip().lower() == "box"
+                )
+
+                box_values = box_line.value_ids.mapped("name") if box_line else []
+
+                # ⚠ biasakan ambil BOX pertama saja
+                box_name = box_values[0] if box_values else False
+                if not box_name:
                     continue
 
-                product_moves = move_lines.filtered(lambda l: l.product_id == product)
+                # 2) GRADE dari VARIANT
+                variant_vals = product.product_template_variant_value_ids
+                grade_values = variant_vals.filtered(
+                    lambda v: v.attribute_id.name.strip().lower() == "grade"
+                ).mapped("name")
 
-                for line in product_moves:
+                grade_name = grade_values[0] if grade_values else False
+                if not grade_name:
+                    continue
+
+                # quants untuk product ini
+                product_quants = quants.filtered(lambda q: q.product_id == product)
+
+                for q in product_quants:
 
                     warehouse = self.env['stock.warehouse'].search([
-                        ('lot_stock_id', 'parent_of', line.location_dest_id.id)
+                        ('lot_stock_id', 'parent_of', q.location_id.id)
                     ], limit=1)
+
                     if not warehouse:
                         continue
                     if selected_warehouses and warehouse not in selected_warehouses:
                         continue
 
-                    uom = line.product_uom_id
-                    uom_name = uom.name if uom else "UNKN"
-                    qty = line.quantity
-                    grade_name = grade_values[0]    # ambil grade produk
+                    qty = q.quantity
 
-                    used_uoms.add(uom_name)
+                    used_boxes.add(box_name)
                     used_grades.add(grade_name)
 
-                    merged_map[warehouse.name][uom_name][grade_name] += qty
+                    merged_map[warehouse.name][box_name][grade_name] += qty
 
-            # jika kosong
+            # Jika kosong
             if not merged_map:
-                return {...}
+                return {
+                    'doc_ids': docids,
+                    'doc_model': 'report.cek.cl.wizard',
+                    'docs': wizard,
+                    'kategori': kategori,
+                    'report_data': [],
+                }
 
-            # susun warehouse_lines final
             warehouse_lines = []
-            for wh_name, uom_dict in merged_map.items():
+            for wh_name, box_dict in merged_map.items():
                 total_wh = 0
-                uom_struct = {}
-                for uom_name, grade_dict in uom_dict.items():
-                    uom_struct[uom_name] = {}
+                box_struct = {}
+
+                for box_name, grade_dict in box_dict.items():
+                    box_struct[box_name] = {}
                     for grade_name, qty in grade_dict.items():
-                        uom_struct[uom_name][grade_name] = qty
+                        box_struct[box_name][grade_name] = qty
                         total_wh += qty
+
                 warehouse_lines.append({
                     "warehouse": wh_name,
-                    "uoms": uom_struct,
+                    "boxes": box_struct,
                     "total": total_wh,
                 })
 
-            # uoms & grades final
-            uoms_list = sorted(list(used_uoms))
+            boxes_list = sorted(list(used_boxes))
             grades_list = sorted(list(used_grades))
 
-            colspan_val = len(uoms_list) * len(grades_list)
+            colspan_val = len(boxes_list) * len(grades_list)
 
             report_data = [{
-                "uoms": uoms_list,
+                "boxes": boxes_list,
                 "grades": grades_list,
                 "warehouse_lines": warehouse_lines,
                 "colspan": colspan_val,
             }]
+
 
 
         return {
