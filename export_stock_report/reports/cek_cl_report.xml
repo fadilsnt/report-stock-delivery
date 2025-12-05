@@ -3,7 +3,7 @@
         <t t-call="web.external_layout">
             <t t-if="kategori == 'LOKAL'">
                     <t t-call="export_stock_report.report_cek_cl_lokal"/>
-            </t>
+            </t> 
             <t t-elif="kategori == 'EXPORT'">
                 <t t-call="export_stock_report.report_cek_cl_export"/>
             </t>

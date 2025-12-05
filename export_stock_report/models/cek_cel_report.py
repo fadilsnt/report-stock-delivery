@@ -3,7 +3,7 @@ from collections import defaultdict
 
 class ReportCekCL(models.AbstractModel):
     _name = 'report.export_stock_report.report_cek_cl'
-    _description = 'Laporan Stok Penerimaan per Produk'
+    _description = 'Laporan Stok Penerimaan per Produk' 
 
     @api.model
     def _get_report_values(self, docids, data=None):
