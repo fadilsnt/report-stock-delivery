@@ -212,13 +212,13 @@
                                 <!-- Qty per warehouse -->
                                 <t t-foreach="wh_lines" t-as="wh">
                                     <td style="text-align:right; padding:6px; border:1px solid #000;">
-                                        <t t-esc="wh['boxes'].get(box, {}).get(grade, 0)"/>
+                                        <t t-esc="'%.2f' % (wh['boxes'].get(box, {}).get(grade, 0) or 0)"/>
                                     </td>
                                 </t>
 
                                 <!-- Total per baris -->
                                 <td style="text-align:right; padding:6px; border:1px solid #000;">
-                                    <t t-esc="row_total"/>
+                                    <t t-esc="'%.2f' % (row_total or 0)"/>
                                 </td>
 
                             </tr>
@@ -238,12 +238,12 @@
 
                         <t t-foreach="wh_lines" t-as="wh">
                             <td style="text-align:right; padding:6px; border:1px solid #000;">
-                                <t t-esc="wh['total']"/>
+                                <t t-esc="'%.2f' % (wh['total'] or 0)"/>
                             </td>
                         </t>
 
                         <td style="text-align:right; padding:6px; border:1px solid #000;">
-                            <t t-esc="data['grand_total']"/>
+                            <t t-esc="'%.2f' % (data['grand_total'] or 0)"/>
                         </td>
                     </tr>
 

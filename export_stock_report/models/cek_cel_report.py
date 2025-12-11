@@ -127,15 +127,14 @@ class ReportCekCL(models.AbstractModel):
                     continue
 
                 # --- CONT ---
-                cont_vals = variant_vals.filtered(
-                    lambda v: v.attribute_id.name.strip().lower() == "cont"
-                ).mapped("name")
-
-                try:
-                    cont_value = float(cont_vals[0]) if cont_vals else 1
-                except:
-                    cont_value = 3200
-
+                cont_vals = product.product_template_attribute_value_ids.filtered(
+                    lambda v: 'cont' in v.attribute_id.name.lower()
+                )
+                if cont_vals:
+                    cont_value = float(cont_vals[0].name)
+                else:
+                    cont_value = 1            
+                
                 # ========================================================
                 # ISI QTY
                 # ========================================================
@@ -153,7 +152,7 @@ class ReportCekCL(models.AbstractModel):
                         continue
 
                     # qty dibagi cont + bulatkan
-                    converted_qty = int(q.quantity / cont_value)
+                    converted_qty = q.quantity / cont_value
 
                     if converted_qty <= 0:
                         continue
@@ -180,7 +179,7 @@ class ReportCekCL(models.AbstractModel):
             for wh in merged_map.values():
                 for box, grade_dict in wh.items():
                     for grade, qty in grade_dict.items():
-                        raw_box_grade_totals[box][grade] += int(qty)
+                        raw_box_grade_totals[box][grade] += qty
 
             # ====================================================================================
             # FILTER GRADE YANG TOTAL > 0
@@ -235,7 +234,7 @@ class ReportCekCL(models.AbstractModel):
                     cleaned_gdict = {}
 
                     for g in grades_in_footer:
-                        qty = int(gdict.get(g, 0))
+                        qty = gdict.get(g, 0)
                         if qty > 0:
                             cleaned_gdict[g] = qty
                             total_wh += qty
