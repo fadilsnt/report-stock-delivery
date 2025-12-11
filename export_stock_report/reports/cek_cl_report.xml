@@ -133,6 +133,11 @@
 
     <template id="report_cek_cl_export">
         <main class="page" style="font-size:12px;">
+            <h3 style="text-align:center; m/argin-bottom:20px;">
+                    Report cek CL EXPORT <br/>
+                    per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
+
+            </h3>
 
             <t t-if="report_data">
                 <t t-set="data" t-value="report_data[0]"/>
@@ -174,35 +179,54 @@
                         </t>
                     </tr>
 
+                   
                     <!-- ======================== -->
-                    <!-- BODY BARU -->
+                    <!-- BODY TANPA ROWSPAN -->
                     <!-- ======================== -->
+
+                    <t t-set="last_box" t-value="''"/>
+
                     <t t-foreach="boxes" t-as="box">
                         <t t-foreach="grades" t-as="grade">
-                            <tr>
+                            
+                            <!-- Hitung row_total dulu -->
+                            <t t-set="row_total"
+                            t-value="sum([wh['boxes'].get(box, {}).get(grade, 0) for wh in wh_lines])"/>
+
+                            <!-- Tampilkan row hanya jika row_total > 0 -->
+                            <tr t-if="row_total > 0">
+
+                                <!-- Kolom BOX -->
                                 <td style="text-align:center; padding:6px; border:1px solid #000;">
-                                    <t t-esc="box"/>
+                                    <t t-if="box != last_box">
+                                        <t t-esc="box"/>
+                                        <t t-set="last_box" t-value="box"/>
+                                    </t>
                                 </td>
+
+                                <!-- Kolom GRADE -->
                                 <td style="text-align:center; padding:6px; border:1px solid #000;">
                                     <t t-esc="grade"/>
                                 </td>
 
-                                <!-- isi qty per warehouse diniatkan menjadi kolom -->
+                                <!-- Qty per warehouse -->
                                 <t t-foreach="wh_lines" t-as="wh">
                                     <td style="text-align:right; padding:6px; border:1px solid #000;">
                                         <t t-esc="wh['boxes'].get(box, {}).get(grade, 0)"/>
                                     </td>
                                 </t>
 
-                                <!-- total per baris box-grade -->
+                                <!-- Total per baris -->
                                 <td style="text-align:right; padding:6px; border:1px solid #000;">
-                                    <t t-set="row_total"
-                                    t-value="sum([wh['boxes'].get(box, {}).get(grade, 0) for wh in wh_lines])"/>
                                     <t t-esc="row_total"/>
                                 </td>
+
                             </tr>
+
                         </t>
                     </t>
+
+
 
                     <!-- ======================== -->
                     <!-- FOOTER BARU (TOTAL PER WAREHOUSE) -->

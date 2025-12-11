@@ -134,7 +134,7 @@ class ReportCekCL(models.AbstractModel):
                 try:
                     cont_value = float(cont_vals[0]) if cont_vals else 1
                 except:
-                    cont_value = 1
+                    cont_value = 3200
 
                 # ========================================================
                 # ISI QTY
