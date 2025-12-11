@@ -99,37 +99,46 @@ class ReportCekCL(models.AbstractModel):
             ])
 
             merged_map = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
-            used_boxes = set()
-            used_grades = set()
 
+            # ============================================================
+            # AMBIL BOX, GRADE, DAN CONT
+            # ============================================================
             for product in products:
 
-                # 1) BOX dari TEMPLATE
                 tmpl = product.product_tmpl_id
                 tmpl_attr_lines = tmpl.attribute_line_ids
 
+                # --- BOX ---
                 box_line = tmpl_attr_lines.filtered(
                     lambda l: l.attribute_id.name.strip().lower() == "box"
                 )
-
                 box_values = box_line.value_ids.mapped("name") if box_line else []
-
-                # ⚠ biasakan ambil BOX pertama saja
                 box_name = box_values[0] if box_values else False
                 if not box_name:
                     continue
 
-                # 2) GRADE dari VARIANT
+                # --- GRADE ---
                 variant_vals = product.product_template_variant_value_ids
                 grade_values = variant_vals.filtered(
                     lambda v: v.attribute_id.name.strip().lower() == "grade"
                 ).mapped("name")
-
                 grade_name = grade_values[0] if grade_values else False
                 if not grade_name:
                     continue
 
-                # quants untuk product ini
+                # --- CONT ---
+                cont_vals = variant_vals.filtered(
+                    lambda v: v.attribute_id.name.strip().lower() == "cont"
+                ).mapped("name")
+
+                try:
+                    cont_value = float(cont_vals[0]) if cont_vals else 1
+                except:
+                    cont_value = 1
+
+                # ========================================================
+                # ISI QTY
+                # ========================================================
                 product_quants = quants.filtered(lambda q: q.product_id == product)
 
                 for q in product_quants:
@@ -143,14 +152,17 @@ class ReportCekCL(models.AbstractModel):
                     if selected_warehouses and warehouse not in selected_warehouses:
                         continue
 
-                    qty = q.quantity
+                    # qty dibagi cont + bulatkan
+                    converted_qty = int(q.quantity / cont_value)
 
-                    used_boxes.add(box_name)
-                    used_grades.add(grade_name)
+                    if converted_qty <= 0:
+                        continue
 
-                    merged_map[warehouse.name][box_name][grade_name] += qty
+                    merged_map[warehouse.name][box_name][grade_name] += converted_qty
 
-            # Jika kosong
+            # ====================================================================================
+            # STOP JIKA SEMUA QTY 0
+            # ====================================================================================
             if not merged_map:
                 return {
                     'doc_ids': docids,
@@ -160,36 +172,103 @@ class ReportCekCL(models.AbstractModel):
                     'report_data': [],
                 }
 
+            # ====================================================================================
+            # HITUNG TOTAL PER BOX × GRADE
+            # ====================================================================================
+            raw_box_grade_totals = defaultdict(lambda: defaultdict(int))
+
+            for wh in merged_map.values():
+                for box, grade_dict in wh.items():
+                    for grade, qty in grade_dict.items():
+                        raw_box_grade_totals[box][grade] += int(qty)
+
+            # ====================================================================================
+            # FILTER GRADE YANG TOTAL > 0
+            # ====================================================================================
+            grades_in_footer = sorted({
+                grade
+                for box in raw_box_grade_totals.values()
+                for grade, qty in box.items()
+                if qty > 0
+            })
+
+            if not grades_in_footer:
+                return {
+                    'doc_ids': docids,
+                    'doc_model': 'report.cek.cl.wizard',
+                    'docs': wizard,
+                    'kategori': kategori,
+                    'report_data': [],
+                }
+
+            # ====================================================================================
+            # FILTER BOX YANG PUNYA GRADE > 0
+            # ====================================================================================
+            boxes_list = sorted([
+                box for box, grades in raw_box_grade_totals.items()
+                if any(grades.get(g, 0) > 0 for g in grades_in_footer)
+            ])
+
+            # ====================================================================================
+            # BOX-GRADE TOTAL FINAL (HANYA YG > 0)
+            # ====================================================================================
+            box_grade_totals = {
+                box: {
+                    g: raw_box_grade_totals[box][g]
+                    for g in grades_in_footer
+                    if raw_box_grade_totals[box][g] > 0
+                }
+                for box in boxes_list
+            }
+
+            # ====================================================================================
+            # WAREHOUSE LINES FINAL (KOSONG HILANG)
+            # ====================================================================================
             warehouse_lines = []
             for wh_name, box_dict in merged_map.items():
+
+                cleaned_boxes = {}
                 total_wh = 0
-                box_struct = {}
 
-                for box_name, grade_dict in box_dict.items():
-                    box_struct[box_name] = {}
-                    for grade_name, qty in grade_dict.items():
-                        box_struct[box_name][grade_name] = qty
-                        total_wh += qty
+                for box in boxes_list:
+                    gdict = box_dict.get(box, {})
+                    cleaned_gdict = {}
 
-                warehouse_lines.append({
-                    "warehouse": wh_name,
-                    "boxes": box_struct,
-                    "total": total_wh,
-                })
+                    for g in grades_in_footer:
+                        qty = int(gdict.get(g, 0))
+                        if qty > 0:
+                            cleaned_gdict[g] = qty
+                            total_wh += qty
 
-            boxes_list = sorted(list(used_boxes))
-            grades_list = sorted(list(used_grades))
+                    # hanya masukkan BOX yang punya grade
+                    if cleaned_gdict:
+                        cleaned_boxes[box] = cleaned_gdict
 
-            colspan_val = len(boxes_list) * len(grades_list)
+                if total_wh > 0:
+                    warehouse_lines.append({
+                        "warehouse": wh_name,
+                        "boxes": cleaned_boxes,
+                        "total": total_wh
+                    })
+
+            # ====================================================================================
+            # GRAND TOTAL
+            # ====================================================================================
+            grand_total = sum(
+                qty for box in box_grade_totals.values()
+                for qty in box.values()
+            )
+
+            colspan_val = len(boxes_list) * len(grades_in_footer)
 
             report_data = [{
                 "boxes": boxes_list,
-                "grades": grades_list,
+                "grades": grades_in_footer,
                 "warehouse_lines": warehouse_lines,
+                "box_grade_totals": box_grade_totals,
                 "colspan": colspan_val,
+                "grand_total": grand_total,
             }]
-
-
 
         return {
             'doc_ids': docids,
@@ -198,3 +277,4 @@ class ReportCekCL(models.AbstractModel):
             'kategori': kategori,
             'report_data': report_data,
         }
+
