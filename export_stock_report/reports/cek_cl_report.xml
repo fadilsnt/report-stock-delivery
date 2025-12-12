@@ -198,10 +198,10 @@
 
                                 <!-- Kolom BOX -->
                                 <td style="text-align:center; padding:6px; border:1px solid #000;">
-                                    <t t-if="box != last_box">
+                                    <!-- <t t-if="box != last_box"> -->
                                         <t t-esc="box"/>
-                                        <t t-set="last_box" t-value="box"/>
-                                    </t>
+                                        <!-- <t t-set="last_box" t-value="box"/> -->
+                                    <!-- </t> -->
                                 </td>
 
                                 <!-- Kolom GRADE -->
