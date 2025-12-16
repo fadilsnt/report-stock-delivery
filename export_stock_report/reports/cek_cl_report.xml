@@ -187,44 +187,68 @@
                     <t t-set="last_box" t-value="''"/>
 
                     <t t-foreach="boxes" t-as="box">
-                        <t t-foreach="grades" t-as="grade">
-                            
-                            <!-- Hitung row_total dulu -->
-                            <t t-set="row_total"
-                            t-value="sum([wh['boxes'].get(box, {}).get(grade, 0) for wh in wh_lines])"/>
 
-                            <!-- Tampilkan row hanya jika row_total > 0 -->
+                        <!-- ================= -->
+                        <!-- DETAIL PER GRADE -->
+                        <!-- ================= -->
+                        <t t-foreach="grades" t-as="grade">
+
+                            <t t-set="row_total"
+                                t-value="sum([wh['boxes'].get(box, {}).get(grade, 0) for wh in wh_lines])"/>
+
                             <tr t-if="row_total > 0">
 
-                                <!-- Kolom BOX -->
                                 <td style="text-align:center; padding:6px; border:1px solid #000;">
-                                    <!-- <t t-if="box != last_box"> -->
-                                        <t t-esc="box"/>
-                                        <!-- <t t-set="last_box" t-value="box"/> -->
-                                    <!-- </t> -->
+                                    <t t-esc="box"/>
                                 </td>
 
-                                <!-- Kolom GRADE -->
                                 <td style="text-align:center; padding:6px; border:1px solid #000;">
                                     <t t-esc="grade"/>
                                 </td>
 
-                                <!-- Qty per warehouse -->
                                 <t t-foreach="wh_lines" t-as="wh">
                                     <td style="text-align:right; padding:6px; border:1px solid #000;">
                                         <t t-esc="'%.2f' % (wh['boxes'].get(box, {}).get(grade, 0) or 0)"/>
                                     </td>
                                 </t>
 
-                                <!-- Total per baris -->
                                 <td style="text-align:right; padding:6px; border:1px solid #000;">
-                                    <t t-esc="'%.2f' % (row_total or 0)"/>
+                                    <t t-esc="'%.2f' % row_total"/>
                                 </td>
-
                             </tr>
 
                         </t>
+
+                        <!-- ================= -->
+                        <!-- TOTAL PER BOX -->
+                        <!-- ================= -->
+                        <t t-set="box_total"
+                            t-value="sum([
+                                wh['boxes'].get(box, {}).get(g, 0)
+                                for wh in wh_lines
+                                for g in grades
+                            ])"/>
+
+                        <tr t-if="box_total > 0" style="background:#f0f0f0; font-weight:bold;">
+                            <td colspan="2" style="padding:6px; border:1px solid #000;">
+                                TOTAL BOX <t t-esc="box"/>
+                            </td>
+
+                            <t t-foreach="wh_lines" t-as="wh">
+                                <td style="text-align:right; padding:6px; border:1px solid #000;">
+                                    <t t-esc="'%.2f' % sum([
+                                        wh['boxes'].get(box, {}).get(g, 0) for g in grades
+                                    ])"/>
+                                </td>
+                            </t>
+
+                            <td style="text-align:right; padding:6px; border:1px solid #000;">
+                                <t t-esc="'%.2f' % box_total"/>
+                            </td>
+                        </tr>
+
                     </t>
+
 
 
 
