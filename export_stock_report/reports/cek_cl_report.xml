@@ -37,7 +37,7 @@
 
                 <h3 style="text-align:center; m/argin-bottom:20px;">
                     TOTAL STOK ARANG LOKAL <br/>
-                    per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
+                    Per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
 
                 </h3>
 
@@ -134,8 +134,8 @@
     <template id="report_cek_cl_export">
         <main class="page" style="font-size:12px;">
             <h3 style="text-align:center; m/argin-bottom:20px;">
-                    Report cek CL EXPORT <br/>
-                    per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
+                    Report Total Box Export <br/>
+                    Per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
 
             </h3>
 
@@ -152,10 +152,10 @@
                     <!-- HEADER BARU (DIPUTAR) -->
                     <!-- ======================== -->
                     <tr style="background:#ddd; font-weight:bold;">
-                        <th rowspan="2" style="text-align:center; padding:6px; border:1px solid #000;">
+                        <th rowspan="3" style="text-align:center; padding:6px; border:1px solid #000;">
                             BOX
                         </th>
-                        <th rowspan="2" style="text-align:center; padding:6px; border:1px solid #000;">
+                        <th rowspan="3" style="text-align:center; padding:6px; border:1px solid #000;">
                             GRADE
                         </th>
 
@@ -165,7 +165,7 @@
                             PABRIK
                         </th>
 
-                        <th rowspan="2"
+                        <th rowspan="3"
                             style="text-align:center; padding:6px; border:1px solid #000;">
                             TOTAL
                         </th>
@@ -175,6 +175,9 @@
                         <t t-foreach="wh_lines" t-as="wh">
                             <th style="text-align:center; padding:6px; border:1px solid #000;">
                                 <t t-esc="wh['warehouse']"/>
+                            </th>
+                            <th style="text-align:center; padding:6px; border:1px solid #000;">
+                                CONT
                             </th>
                         </t>
                     </tr>
