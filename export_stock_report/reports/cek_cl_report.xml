@@ -152,10 +152,10 @@
                     <!-- HEADER BARU (DIPUTAR) -->
                     <!-- ======================== -->
                     <tr style="background:#ddd; font-weight:bold;">
-                        <th rowspan="3" style="text-align:center; padding:6px; border:1px solid #000;">
+                        <th rowspan="2" style="text-align:center; padding:6px; border:1px solid #000;">
                             BOX
                         </th>
-                        <th rowspan="3" style="text-align:center; padding:6px; border:1px solid #000;">
+                        <th rowspan="2" style="text-align:center; padding:6px; border:1px solid #000;">
                             GRADE
                         </th>
 
@@ -165,7 +165,7 @@
                             PABRIK
                         </th>
 
-                        <th rowspan="3"
+                        <th rowspan="2"
                             style="text-align:center; padding:6px; border:1px solid #000;">
                             TOTAL
                         </th>
@@ -175,9 +175,6 @@
                         <t t-foreach="wh_lines" t-as="wh">
                             <th style="text-align:center; padding:6px; border:1px solid #000;">
                                 <t t-esc="wh['warehouse']"/>
-                            </th>
-                            <th style="text-align:center; padding:6px; border:1px solid #000;">
-                                CONT
                             </th>
                         </t>
                     </tr>
