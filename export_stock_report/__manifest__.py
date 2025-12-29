@@ -22,13 +22,13 @@
         "reports/dalam_pengiriman.xml",
         "reports/cek_cl_report.xml",
         "security/ir.model.access.csv",
+        # "static/src/js/user_menu.xml",
         
     ],
     'assets': {
         'web.assets_backend': [
-            # 'export_stock_report/static/src/js/user_info_header.js',
-            # 'export_stock_report/static/src/xml/user_info_header.xml',
-           
+            ('after', 'web/static/src/webclient/user_menu/user_menu.js', 'export_stock_report/static/src/js/user_menu.js'),
+            'export_stock_report/static/src/js/user_menu.xml',
         ],
     },
 
