@@ -1,5 +1,7 @@
 from odoo import models, api
 from collections import defaultdict
+import re
+
 
 class ReportCekCL(models.AbstractModel):
     _name = 'report.export_stock_report.report_cek_cl'
@@ -202,10 +204,15 @@ class ReportCekCL(models.AbstractModel):
             # ==============================================================
             # BOX YANG DIPAKAI
             # ==============================================================
-            boxes_list = sorted([
-                box for box, grades in raw_box_grade_totals.items()
-                if any(grades.get(g, 0) > 0 for g in grades_in_footer)
-            ])
+            boxes_list = sorted(
+                [
+                    box for box, grades in raw_box_grade_totals.items()
+                    if any(grades.get(g, 0) > 0 for g in grades_in_footer)
+                ],
+                key=self._box_sort_key
+            )
+
+
 
             # ==============================================================
             # TOTAL BOX × GRADE FINAL
@@ -281,4 +288,16 @@ class ReportCekCL(models.AbstractModel):
             'kategori': kategori,
             'report_data': report_data,
         }
+    
+    def _box_sort_key(self, box_name):
+        name = (box_name or "").lower()
+
+        match = re.search(r'(\d+(?:\.\d+)?)', name)
+        number = float(match.group(1)) if match else 0
+
+        has_number = 1 if match else 0
+
+        return (has_number, number, name)
+
+
 
