@@ -135,6 +135,7 @@
         <main class="page" style="font-size:12px;">
             <h3 style="text-align:center; m/argin-bottom:20px;">
                     Report Total Box Export <br/>
+                    Dalam satuan CONTAINER <br/>
                     Per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
 
             </h3>
