@@ -19,8 +19,6 @@ class ReportStockWarehouse(models.AbstractModel):
             ('scheduled_date', '<=', wizard.end_date),
             ('picking_type_id.warehouse_id', 'in',
              wizard.warehouse_ids.ids or self.env['stock.warehouse'].search([]).ids),
-            ('person_ids', 'in',
-             wizard.sales_person_ids.ids or self.env['res.users'].search([]).ids),
             ('state', 'not in', ['draft', 'cancel'])
         ]
 
@@ -30,7 +28,12 @@ class ReportStockWarehouse(models.AbstractModel):
         results = defaultdict(
             lambda: defaultdict(
                 lambda: defaultdict(
-                    lambda: defaultdict(lambda: {"box": 0, "cont": 0, "grade": None, "name_product": None})
+                    lambda: defaultdict(lambda: {
+                        "box": 0,
+                        "cont": 0,
+                        "grade": None,
+                        "name_product": None
+                    })
                 )
             )
         )
@@ -38,25 +41,40 @@ class ReportStockWarehouse(models.AbstractModel):
         warehouses = set()
         products = set()
         grades = set()
+
         colors = ["#d97c7c", "#7c9bd9", "#7cd99b", "#d9b37c", "#9e7cd9"]
         bg_color = random.choice(colors)
 
         grand_totals = {"box": 0, "cont": 0}
         warehouse_totals = defaultdict(lambda: {"box": 0, "cont": 0})
-        # ===== change here: customer_totals per warehouse + total =====
-        customer_totals = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {"box": 0, "cont": 0})))
+
+        customer_totals = defaultdict(
+            lambda: defaultdict(
+                lambda: defaultdict(lambda: {"box": 0, "cont": 0})
+            )
+        )
 
         # ===== Loop picking & move line =====
-        seen_quant = set()  # untuk menghindari double counting per (product, owner, warehouse)
+        seen_quant = set()
+
         for picking in pickings:
-            salesperson = picking.person_ids.name or "-"
-            # NOTE: jangan langsung gunakan picking.owner_id di sini — owner sebenarnya per move_line
             wh = picking.picking_type_id.warehouse_id
             wh_name = wh.name
             warehouses.add(wh_name)
 
             for ml in picking.move_line_ids:
-                # kategori filter tetap sama
+
+                # ==================================================
+                # FILTER OWNER SESUAI WIZARD SALES PERSON
+                # ==================================================
+                if wizard.sales_person_ids:
+                    if not ml.owner_id or ml.owner_id.id not in wizard.sales_person_ids.ids:
+                        continue
+
+                # ===== Salesperson dari owner move line =====
+                salesperson = ml.owner_id.name if ml.owner_id else "No Owner"
+
+                # ===== Filter kategori =====
                 categ_name = (ml.product_id.categ_id.name or "").lower()
                 if wizard.kategori_selection == "export" and categ_name != "export":
                     continue
@@ -67,61 +85,51 @@ class ReportStockWarehouse(models.AbstractModel):
                 products.add(prod)
                 pr_name = ml.product_id.name
 
-                # Ambil grade dari nama produk (misal Product (A))
-                # match = re.search(r'\((.*?)\)', prod)
-                # grade_from_display_name = match.group(1) if match else None
+                # ===== Grade =====
                 grade_from_display_name = self._get_grade(ml.product_id)
                 if grade_from_display_name:
                     grades.add(grade_from_display_name)
 
-                # Tentukan owner yang benar: prioritas ml.owner_id, lalu picking.owner_id, lalu partner
-                owner = ml.owner_id or picking.owner_id or picking.partner_id
+                # ===== Owner & customer =====
+                owner = ml.owner_id
                 owner_id = owner.id if owner else False
-                # gunakan owner name untuk grouping customer
-                customer = owner.name if owner and owner.name else (picking.partner_id.name or "Unknown Customer")
+                customer = owner.name if owner else "Unknown Customer"
 
-                # key untuk mencegah hitungan berulang sama (product, owner, warehouse)
+                # ===== Hindari double counting =====
                 seen_key = (ml.product_id.id, owner_id, wh.id)
                 if seen_key in seen_quant:
-                    # sudah dihitung quant untuk kombinasi ini => skip
                     continue
                 seen_quant.add(seen_key)
 
+                # ===== Ambil quant =====
                 quant_domain = [
                     ('product_id', '=', ml.product_id.id),
                     ('location_id', 'child_of', wh.view_location_id.id),
-                    ('owner_id', '=', owner_id)
                 ]
-                qty_onhand = sum(self.env['stock.quant'].search(quant_domain).mapped('quantity')) if owner_id else sum(self.env['stock.quant'].search([
-                    ('product_id', '=', ml.product_id.id),
-                    ('location_id', 'child_of', wh.view_location_id.id),
-                ]).mapped('quantity'))
-                qty = qty_onhand
+                if owner_id:
+                    quant_domain.append(('owner_id', '=', owner_id))
+
+                qty = sum(self.env['stock.quant'].search(quant_domain).mapped('quantity'))
 
                 box = qty
-                # cont = qty / ml.product_id.container_capacity if ml.product_id.container_capacity else 0
                 cont_capacity = self._get_cont_capacity(ml.product_id)
                 cont = qty / cont_capacity if cont_capacity else 0
 
-                # Simpan ke results
+                # ===== Simpan =====
                 data_dict = results[salesperson][customer][prod][wh_name]
                 data_dict["box"] += box
                 data_dict["cont"] += cont
                 data_dict["grade"] = grade_from_display_name
                 data_dict["name_product"] = pr_name
 
-                # Total per warehouse
                 warehouse_totals[wh_name]["box"] += box
                 warehouse_totals[wh_name]["cont"] += cont
 
-                # === customer_totals: per warehouse ===
                 customer_totals[salesperson][customer][wh_name]["box"] += box
                 customer_totals[salesperson][customer][wh_name]["cont"] += cont
-                # and accumulate total under key "total"
                 customer_totals[salesperson][customer]["total"]["box"] += box
                 customer_totals[salesperson][customer]["total"]["cont"] += cont
 
-                # Total global
                 grand_totals["box"] += box
                 grand_totals["cont"] += cont
 
@@ -300,7 +308,7 @@ class ReportStockWarehouse(models.AbstractModel):
 
 
         }
-    
+
     def _get_cont_capacity(self, product):
         cont_attr = product.product_template_attribute_value_ids.filtered(
             lambda v: 'cont' in v.attribute_id.name.lower()
@@ -308,16 +316,12 @@ class ReportStockWarehouse(models.AbstractModel):
         if cont_attr:
             try:
                 return float(cont_attr[0].name)
-            except:
+            except Exception:
                 return 0
         return 0
-    
+
     def _get_grade(self, product):
         grade_attr = product.product_template_attribute_value_ids.filtered(
             lambda v: 'grade' in v.attribute_id.name.lower()
         )
-        if grade_attr:
-            return grade_attr[0].name
-        return None
-
-
+        return grade_attr[0].name if grade_attr else None
