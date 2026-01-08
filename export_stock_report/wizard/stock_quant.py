@@ -21,7 +21,7 @@ class StockReportWizard(models.TransientModel):
     )
 
     sales_person_ids = fields.Many2many(
-        'res.users',
+        'res.partner',
         string='Sales Persons'
     )
 

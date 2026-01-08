@@ -19,8 +19,8 @@ class ReportStockWarehouse(models.AbstractModel):
             ('picking_id.scheduled_date', '<=', wizard.end_date),
             ('picking_id.picking_type_id.warehouse_id', 'in',
             wizard.warehouse_ids.ids or self.env['stock.warehouse'].search([]).ids),
-            ('sales_person_ids', 'in',
-            wizard.sales_person_ids.ids or self.env['res.users'].search([]).ids),
+            ('owner_id', 'in',
+            wizard.sales_person_ids.ids or self.env['res.partner'].search([]).ids),
             ('state', 'not in', ['draft', 'cancel']),
         ]
 
@@ -53,11 +53,9 @@ class ReportStockWarehouse(models.AbstractModel):
         for picking in pickings:
             salespersons = moves.filtered(
                 lambda m: m.picking_id == picking
-            ).mapped('sales_person_ids')
+            ).mapped('owner_id')
 
             salesperson = ", ".join(salespersons.mapped('name')) if salespersons else "-"
-
-            # NOTE: jangan langsung gunakan picking.owner_id di sini — owner sebenarnya per move_line
             wh = picking.picking_type_id.warehouse_id
             wh_name = wh.name
             warehouses.add(wh_name)
@@ -81,14 +79,20 @@ class ReportStockWarehouse(models.AbstractModel):
                 if grade_from_display_name:
                     grades.add(grade_from_display_name)
 
-                # Tentukan owner yang benar: prioritas ml.owner_id, lalu picking.owner_id, lalu partner
-                owner = ml.owner_id or picking.owner_id or picking.partner_id
-                owner_id = owner.id if owner else False
-                # gunakan owner name untuk grouping customer
-                customer = owner.name if owner and owner.name else (picking.partner_id.name or "Unknown Customer")
+                # ambil salesperson dari stock.move (bukan owner lagi)
+                sales_users = ml.move_id.sales_person_ids or picking.move_ids.mapped('sales_person_ids')
+
+                # ambil partner dari user
+                partners = sales_users.mapped('partner_id')
+
+                # untuk grouping customer (string)
+                customer = ", ".join(partners.mapped('name')) if partners else "Unknown Customer"
+
+                # untuk key unik (pakai tuple partner_id)
+                partner_ids = tuple(partners.ids) if partners else (False,)
 
                 # key untuk mencegah hitungan berulang sama (product, owner, warehouse)
-                seen_key = (ml.product_id.id, owner_id, wh.id)
+                seen_key = (ml.product_id.id, partner_ids, wh.id)
                 if seen_key in seen_quant:
                     # sudah dihitung quant untuk kombinasi ini => skip
                     continue
@@ -97,12 +101,9 @@ class ReportStockWarehouse(models.AbstractModel):
                 quant_domain = [
                     ('product_id', '=', ml.product_id.id),
                     ('location_id', 'child_of', wh.view_location_id.id),
-                    ('owner_id', '=', owner_id)
+                    # ('owner_id', 'in', partners.ids)
                 ]
-                qty_onhand = sum(self.env['stock.quant'].search(quant_domain).mapped('quantity')) if owner_id else sum(self.env['stock.quant'].search([
-                    ('product_id', '=', ml.product_id.id),
-                    ('location_id', 'child_of', wh.view_location_id.id),
-                ]).mapped('quantity'))
+                qty_onhand = sum(self.env['stock.quant'].search(quant_domain).mapped('quantity'))
                 qty = qty_onhand
 
                 box = qty

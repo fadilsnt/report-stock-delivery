@@ -9,7 +9,7 @@ class ExportStockWizard(models.TransientModel):
         string='Warehouses'
     )
     sales_person_ids = fields.Many2many(
-        'res.users',
+        'res.partner',
         string='Sales Persons'
     )
     start_date = fields.Date(

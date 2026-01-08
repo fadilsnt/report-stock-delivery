@@ -20,8 +20,8 @@ class ReportExportStock(models.AbstractModel):
             ('picking_id.scheduled_date', '<=', wizard.end_date),
             ('picking_id.picking_type_id.warehouse_id', 'in',
             wizard.warehouse_ids.ids or self.env['stock.warehouse'].search([]).ids),
-            ('sales_person_ids', 'in',
-            wizard.sales_person_ids.ids or self.env['res.users'].search([]).ids),
+            ('owner_id', 'in',
+            wizard.sales_person_ids.ids or self.env['res.partner'].search([]).ids),
             ('state', 'not in', ['draft', 'cancel']),
         ]
 
@@ -50,11 +50,21 @@ class ReportExportStock(models.AbstractModel):
         for picking in pickings:
             salespersons = moves.filtered(
                 lambda m: m.picking_id == picking
-            ).mapped('sales_person_ids')
+            ).mapped('owner_id')
 
             salesperson = ", ".join(salespersons.mapped('name')) if salespersons else "-"
 
-            customer = picking.partner_id.name
+            # ambil sales person dari stock.move (user)
+            sales_users = moves.filtered(
+                lambda m: m.picking_id == picking
+            ).mapped('sales_person_ids')
+
+            # ambil partner dari user
+            partners = sales_users.mapped('partner_id')
+
+            # nama customer untuk grouping
+            customer = ", ".join(partners.mapped('name')) if partners else "Unknown Customer"
+
             wh_name = picking.picking_type_id.warehouse_id.name
             warehouses.add(wh_name)
 
