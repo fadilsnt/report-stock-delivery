@@ -51,11 +51,6 @@ class ReportStockWarehouse(models.AbstractModel):
         # ===== Loop picking & move line =====
         seen_quant = set()  # untuk menghindari double counting per (product, owner, warehouse)
         for picking in pickings:
-            salespersons = moves.filtered(
-                lambda m: m.picking_id == picking
-            ).mapped('owner_id')
-
-            salesperson = ", ".join(salespersons.mapped('name')) if salespersons else "-"
             wh = picking.picking_type_id.warehouse_id
             wh_name = wh.name
             warehouses.add(wh_name)
@@ -67,6 +62,14 @@ class ReportStockWarehouse(models.AbstractModel):
                     continue
                 elif wizard.kategori_selection == "lokal" and categ_name != "lokal":
                     continue
+                sales_users = ml.move_id.owner_id or picking.move_ids.mapped('owner_id')
+
+                if not sales_users:
+                    sales_users = self.env['res.partner']
+
+                for sales_user in sales_users:
+                    salesperson = sales_user.name
+
 
                 prod = ml.product_id.display_name
                 products.add(prod)

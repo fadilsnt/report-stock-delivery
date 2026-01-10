@@ -48,11 +48,11 @@ class ReportExportStock(models.AbstractModel):
 
         # ===== Loop picking & move line =====
         for picking in pickings:
-            salespersons = moves.filtered(
-                lambda m: m.picking_id == picking
-            ).mapped('owner_id')
+            # salespersons = moves.filtered(
+            #     lambda m: m.picking_id == picking
+            # ).mapped('owner_id')
 
-            salesperson = ", ".join(salespersons.mapped('name')) if salespersons else "-"
+            # salesperson = ", ".join(salespersons.mapped('name')) if salespersons else "-"
 
             # ambil sales person dari stock.move (user)
             sales_users = moves.filtered(
@@ -75,6 +75,14 @@ class ReportExportStock(models.AbstractModel):
                     continue
                 elif wizard.kategori_selection == "lokal" and categ_name != "lokal":
                     continue
+
+                sales_users = ml.move_id.owner_id or picking.move_ids.mapped('owner_id')
+
+                if not sales_users:
+                    sales_users = self.env['res.partner']
+
+                for sales_user in sales_users:
+                    salesperson = sales_user.name
 
                 prod = ml.product_id.display_name
                 products.add(prod)
