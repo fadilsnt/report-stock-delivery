@@ -9,6 +9,19 @@
                 <field name="sales_person_ids" invisible="1"/>
                 <field name="person_ids" readonly="state != 'draft'"/>
             </xpath>
+
+            <xpath expr="//field[@name='move_ids_without_package']/list/field[@name='name']"
+             position="before">
+                <field name="no_cont"
+                    attrs="{'invisible': [('picking_type_code','!=','internal')]}"/>
+            </xpath>
+
+            <!-- keterangan sebelum product_uom -->
+            <xpath expr="//field[@name='move_ids_without_package']/list/field[@name='product_uom']"
+                    position="before">
+                <field name="keterangan"
+                    attrs="{'invisible': [('picking_type_code','!=','internal')]}"/>
+            </xpath>
         </field>
     </record>
 </odoo>

@@ -48,14 +48,14 @@ class ReportDalamPengiriman(models.AbstractModel):
                 # eta = picking.date_deadline
 
                 result[warehouse][design][grade].append({
-                    'origin': origin,
+                    'origin': move.no_cont or '-',
                     # 'etd': etd,
                     # 'eta': eta,
                     'product': design,
                     'grade': grade,
                     'qty': qty,
                     'destination': destination,
-                    'ket': picking.note or '-',
+                    'ket': move.keterangan or '-',
                 })
 
         # ===== Buat total per design (summary per warehouse) =====
