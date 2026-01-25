@@ -41,10 +41,13 @@
 
                 <t t-foreach="data_warehouse.items()" t-as="design_item">
                   <t t-set="grade_dict" t-value="design_item[1]"/>
-                  <t t-foreach="grade_dict.items()" t-as="grade_item">
-                    <t t-set="lines" t-value="grade_item[1]"/>
 
-                    <t t-foreach="lines" t-as="line">
+                  <t t-foreach="grade_dict.items()" t-as="grade_item">
+                    <t t-set="cont_dict" t-value="grade_item[1]"/>
+
+                    <t t-foreach="cont_dict.items()" t-as="cont_item">
+                      <t t-set="line" t-value="cont_item[1]"/>
+
                       <tr>
                         <td><t t-esc="no"/></td>
                         <td><t t-esc="line['origin']"/></td>
@@ -73,6 +76,7 @@
                   <td colspan="2"></td>
                 </tr>
               </tbody>
+
             </table>
 
             <!-- ====================== TABLE TOTAL PER DESIGN ====================== -->
