@@ -35,7 +35,7 @@
                     }
                 </style>
 
-                <h3 style="text-align:center; m/argin-bottom:20px;">
+                <h3 style="text-align:center; margin-bottom:20px;">
                     TOTAL STOK ARANG LOKAL <br/>
                     Per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
 
@@ -133,7 +133,7 @@
 
     <template id="report_cek_cl_export">
         <main class="page" style="font-size:12px;">
-            <h3 style="text-align:center; m/argin-bottom:20px;">
+            <h3 style="text-align:center; margin-bottom:20px;">
                     Report Total Box Export <br/>
                     Dalam satuan CONTAINER <br/>
                     Per tanggal <t t-esc="time.strftime('%d-%m-%Y', time.strptime(str(docs.end_date), '%Y-%m-%d'))"/>
@@ -208,7 +208,7 @@
                                 </td>
 
                                 <t t-foreach="wh_lines" t-as="wh">
-                                    <td style="text-align:right; padding:6px; border:1px solid #000;">
+                                    <td style="text-align:center; padding:6px; border:1px solid #000;">
                                         <t t-esc="('{:,.2f}'.format(wh['boxes'].get(box, {}).get(grade, 0) or 0))
                                             .replace(',', 'X')
                                             .replace('.', ',')
@@ -217,7 +217,7 @@
 
                                 </t>
 
-                                <td style="text-align:right; padding:6px; border:1px solid #000;">
+                                <td style="text-align:center; padding:6px; border:1px solid #000;">
                                     <t t-esc="('{:,.2f}'.format(row_total or 0))
                                         .replace(',', 'X')
                                         .replace('.', ',')
@@ -244,7 +244,7 @@
                             </td>
 
                             <t t-foreach="wh_lines" t-as="wh">
-                                <td style="text-align:right; padding:6px; border:1px solid #000;">
+                                <td style="text-align:center; padding:6px; border:1px solid #000;">
                                     <t t-esc="('{:,.2f}'.format(
                                         sum([wh['boxes'].get(box, {}).get(g, 0) for g in grades]) or 0
                                     ))
@@ -254,7 +254,7 @@
                                 </td>
                             </t>
 
-                            <td style="text-align:right; padding:6px; border:1px solid #000;">
+                            <td style="text-align:center; padding:6px; border:1px solid #000;">
                                 <t t-esc="('{:,.2f}'.format(box_total or 0))
                                     .replace(',', 'X')
                                     .replace('.', ',')
@@ -277,7 +277,7 @@
                         </td>
 
                         <t t-foreach="wh_lines" t-as="wh">
-                            <td style="text-align:right; padding:6px; border:1px solid #000;">
+                            <td style="text-align:center; padding:6px; border:1px solid #000;">
                                 <t t-esc="('{:,.2f}'.format(wh['total'] or 0))
                                     .replace(',', 'X')
                                     .replace('.', ',')
@@ -285,7 +285,7 @@
                             </td>
                         </t>
 
-                        <td style="text-align:right; padding:6px; border:1px solid #000;">
+                        <td style="text-align:center; padding:6px; border:1px solid #000;">
                             <t t-esc="('{:,.2f}'.format(data['grand_total'] or 0))
                                 .replace(',', 'X')
                                 .replace('.', ',')

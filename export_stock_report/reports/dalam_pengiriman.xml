@@ -21,7 +21,7 @@
             </h4>
 
             <!-- ====================== TABLE DETAIL ====================== -->
-            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; text-align:left;">
+            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; text-align:center;">
               <thead>
                 <tr style="background-color:#d9d9d9; border:1px solid #999;">
                   <th>No</th>
@@ -78,7 +78,7 @@
             <!-- ====================== TABLE TOTAL PER DESIGN ====================== -->
             <div style="margin-top:20px;">
               <h5 style="font-weight:bold;">TOTAL / DESIGN</h5>
-              <table style="width:60%; border-collapse:collapse; font-size:12px; text-align:left;">
+              <table style="width:60%; border-collapse:collapse; font-size:12px; text-align:center;">
                 <thead>
                   <tr style="background-color:#d9d9d9;">
                     <th>DESIGN / GRADE</th>

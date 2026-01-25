@@ -76,14 +76,14 @@
                                                     <t t-set="val_box" t-value="vals.get('box', 0)"/>
                                                     <t t-set="val_cont" t-value="vals.get('cont', 0)"/>
 
-                                                    <td style="text-align:right;">
+                                                    <td style="text-align:center;">
                                                         <t t-esc="('{:,.0f}'.format(val_box or 0))
                                                             .replace(',', 'X')
                                                             .replace('.', ',')
                                                             .replace('X', '.')"/>
                                                     </td>
 
-                                                    <td style="text-align:right;">
+                                                    <td style="text-align:center;">
                                                         <t t-esc="('{:,.2f}'.format(val_cont or 0))
                                                             .replace(',', 'X')
                                                             .replace('.', ',')
@@ -102,13 +102,13 @@
                                                 </t>
 
                                                 <!-- total varian -->
-                                                <td style="text-align:right;">
+                                                <td style="text-align:center;">
                                                     <t t-esc="('{:,.0f}'.format(total_box or 0))
                                                         .replace(',', 'X')
                                                         .replace('.', ',')
                                                         .replace('X', '.')"/>
                                                 </td>
-                                                <td style="text-align:right;">
+                                                <td style="text-align:center;">
                                                     <t t-esc="('{:,.2f}'.format(total_cont or 0))
                                                         .replace(',', 'X')
                                                         .replace('.', ',')
@@ -134,13 +134,13 @@
 
                                                 <!-- total per warehouse -->
                                                 <t t-foreach="warehouses" t-as="wh">
-                                                    <td style="text-align:right;">
+                                                    <td style="text-align:center;">
                                                         <t t-esc="('{:,.0f}'.format(wh_totals[wh]['box'] or 0))
                                                             .replace(',', 'X')
                                                             .replace('.', ',')
                                                             .replace('X', '.')"/>
                                                     </td>
-                                                    <td style="text-align:right;">
+                                                    <td style="text-align:center;">
                                                         <t t-esc="('{:,.2f}'.format(wh_totals[wh]['cont'] or 0))
                                                             .replace(',', 'X')
                                                             .replace('.', ',')
@@ -149,13 +149,13 @@
                                                 </t>
 
                                                 <!-- total keseluruhan -->
-                                                <td style="text-align:right;">
+                                                <td style="text-align:center;">
                                                     <t t-esc="('{:,.0f}'.format(subtotal_box or 0))
                                                         .replace(',', 'X')
                                                         .replace('.', ',')
                                                         .replace('X', '.')"/>
                                                 </td>
-                                                <td style="text-align:right;">
+                                                <td style="text-align:center;">
                                                     <t t-esc="('{:,.2f}'.format(subtotal_cont or 0))
                                                         .replace(',', 'X')
                                                         .replace('.', ',')
@@ -174,7 +174,7 @@
                                     <tr style="font-weight:bold;">
                                             <td colspan="2">GRAND TOTAL</td>
                                             <t t-foreach="warehouses" t-as="wh">
-                                                <td style="text-align:right;">
+                                                <td style="text-align:center;">
                                                     <t t-esc="('{:,.0f}'.format(
                                                         customer_totals
                                                             .get(salesperson, {})
@@ -186,7 +186,7 @@
                                                     .replace('.', ',')
                                                     .replace('X', '.')"/>
                                                 </td>
-                                                <td style="text-align:right;">
+                                                <td style="text-align:center;">
                                                     <t t-esc="('{:,.2f}'.format(
                                                         customer_totals
                                                             .get(salesperson, {})
@@ -201,7 +201,7 @@
                                             </t>
 
                                             <!-- total per customer -->
-                                            <td style="text-align:right;">
+                                            <td style="text-align:center;">
                                                 <t t-esc="('{:,.0f}'.format(
                                                     customer_totals
                                                         .get(salesperson, {})
@@ -214,7 +214,7 @@
                                                 .replace('X', '.')"/>
                                             </td>
 
-                                            <td style="text-align:right;">
+                                            <td style="text-align:center;">
                                                 <t t-esc="('{:,.2f}'.format(
                                                     customer_totals
                                                         .get(salesperson, {})
@@ -279,7 +279,7 @@
 
                                     <!-- per warehouse -->
                                     <t t-foreach="warehouses" t-as="wh">
-                                        <td style="text-align:right;">
+                                        <td style="text-align:center;">
                                             <t t-esc="('{:,.0f}'.format(
                                                 customer_totals.get(salesperson, {})
                                                     .get(cust_name, {})
@@ -290,7 +290,7 @@
                                             .replace('.', ',')
                                             .replace('X', '.')"/>
                                         </td>
-                                        <td style="text-align:right;">
+                                        <td style="text-align:center;">
                                             <t t-esc="('{:,.2f}'.format(
                                                 customer_totals.get(salesperson, {})
                                                     .get(cust_name, {})
@@ -304,7 +304,7 @@
                                     </t>
 
                                     <!-- total per customer -->
-                                    <td style="text-align:right;">
+                                    <td style="text-align:center;">
                                         <t t-esc="('{:,.0f}'.format(
                                             customer_totals.get(salesperson, {})
                                                 .get(cust_name, {})
@@ -315,7 +315,7 @@
                                         .replace('.', ',')
                                         .replace('X', '.')"/>
                                     </td>
-                                    <td style="text-align:right;">
+                                    <td style="text-align:center;">
                                         <t t-esc="('{:,.2f}'.format(
                                             customer_totals.get(salesperson, {})
                                                 .get(cust_name, {})
@@ -336,7 +336,7 @@
                                 </td>
 
                                 <t t-foreach="warehouses" t-as="wh">
-                                    <td style="text-align:right;">
+                                    <td style="text-align:center;">
                                         <t t-esc="('{:,.0f}'.format(
                                             salesperson_totals.get(salesperson, {})
                                                 .get(wh, {})
@@ -346,7 +346,7 @@
                                         .replace('.', ',')
                                         .replace('X', '.')"/>
                                     </td>
-                                    <td style="text-align:right;">
+                                    <td style="text-align:center;">
                                         <t t-esc="('{:,.2f}'.format(
                                             salesperson_totals.get(salesperson, {})
                                                 .get(wh, {})
@@ -358,7 +358,7 @@
                                     </td>
                                 </t>
 
-                                <td style="text-align:right;">
+                                <td style="text-align:center;">
                                     <t t-esc="('{:,.0f}'.format(
                                         salesperson_totals.get(salesperson, {})
                                             .get('total', {})
@@ -368,7 +368,7 @@
                                     .replace('.', ',')
                                     .replace('X', '.')"/>
                                 </td>
-                                <td style="text-align:right;">
+                                <td style="text-align:center;">
                                     <t t-esc="('{:,.2f}'.format(
                                         salesperson_totals.get(salesperson, {})
                                             .get('total', {})
@@ -386,7 +386,7 @@
                             <td colspan="2" style="text-align:left;padding-left:5px;">GRAND TOTAL</td>
 
                             <t t-foreach="warehouses" t-as="wh">
-                                <td style="text-align:right;">
+                                <td style="text-align:center;">
                                     <t t-esc="('{:,.0f}'.format(
                                         grand_totals_per_wh.get(wh, {}).get('box', 0) or 0
                                     ))
@@ -394,7 +394,7 @@
                                     .replace('.', ',')
                                     .replace('X', '.')"/>
                                 </td>
-                                <td style="text-align:right;">
+                                <td style="text-align:center;">
                                     <t t-esc="('{:,.2f}'.format(
                                         grand_totals_per_wh.get(wh, {}).get('cont', 0) or 0
                                     ))
@@ -404,7 +404,7 @@
                                 </td>
                             </t>
 
-                            <td style="text-align:right;">
+                            <td style="text-align:center;">
                                 <t t-esc="('{:,.0f}'.format(
                                     grand_totals_per_wh.get('total', {}).get('box', 0) or 0
                                 ))
@@ -412,7 +412,7 @@
                                 .replace('.', ',')
                                 .replace('X', '.')"/>
                             </td>
-                            <td style="text-align:right;">
+                            <td style="text-align:center;">
                                 <t t-esc="('{:,.2f}'.format(
                                     grand_totals_per_wh.get('total', {}).get('cont', 0) or 0
                                 ))
