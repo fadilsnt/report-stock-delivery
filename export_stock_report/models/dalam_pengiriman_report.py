@@ -77,8 +77,11 @@ class ReportDalamPengiriman(models.AbstractModel):
             for design, grade_dict in design_dict.items():
 
                 total_box = 0
+                grade_name = None
 
                 for grade, cont_dict in grade_dict.items():
+                    grade_name = grade
+
                     for no_cont, line in cont_dict.items():
                         total_box += line['qty']
 
@@ -111,7 +114,7 @@ class ReportDalamPengiriman(models.AbstractModel):
                     total_cont = total_box / 3100.0
 
                 total_per_design[warehouse].append({
-                    'design': design,
+                    'design': f"{design} / {grade_name}",
                     'total_box': total_box,
                     'total_cont': total_cont,
                 })
