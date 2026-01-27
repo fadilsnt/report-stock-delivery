@@ -179,8 +179,8 @@
 
                                         <t t-set="prev_base" t-value="base_name"/>
 
-                                        <tr style="font-weight:bold;">
-                                            <td colspan="2">GRAND TOTAL</td>
+                                        <!-- <tr style="font-weight:bold;">
+                                            <td colspan="2">GRAND TOTAL 1</td>
 
                                             <t t-foreach="warehouses" t-as="wh">
                                                 <td style="text-align:center;">
@@ -221,8 +221,6 @@
                                                             ) or '-'"/>
                                                 </td>
                                             </t>
-
-                                            <!-- total per customer -->
                                             <td style="text-align:center;">
                                                 <t t-esc="customer_totals
                                                             .get(salesperson, {})
@@ -260,7 +258,7 @@
                                                             .replace('X', '.')
                                                         ) or '-'"/>
                                             </td>
-                                        </tr>
+                                        </tr> -->
                                     </t>
                                 </tbody>
 

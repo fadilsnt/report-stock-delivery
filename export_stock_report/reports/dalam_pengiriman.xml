@@ -55,7 +55,7 @@
                         <td style="border:1px solid #000;"></td>
                         <td style="text-align:left;border:1px solid #000;"><t t-esc="line['product']"/></td>
                         <td style="border:1px solid #000;"><t t-esc="line['grade']"/></td>
-                        <td>
+                        <td style="border:1px solid #000;">
                           <t t-esc="('{:,.0f}'.format(line['qty'])).replace(',', '.')"/>
                         </td>
                         <td style="border:1px solid #000;"><t t-esc="line['destination']"/></td>
