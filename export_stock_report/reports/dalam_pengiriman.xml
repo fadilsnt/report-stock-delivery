@@ -32,7 +32,7 @@
                   <th style="border:1px solid #000;">Grade</th>
                   <th style="border:1px solid #000;">Qty</th>
                   <th style="border:1px solid #000;">Tujuan</th>
-                  <th>Ket</th>
+                  <th style="border:1px solid #000;">Ket</th>
                 </tr>
               </thead>
               <tbody>
