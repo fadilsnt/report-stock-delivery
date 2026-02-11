@@ -14,6 +14,7 @@ class StockReportWizard(models.TransientModel):
         ('all', 'All'),
         ('lokal', 'Lokal'),
         ('export', 'Export'),
+        ('fuel', 'Fuel'),
     ], string="Kategori", default="all")
 
     end_date = fields.Date(

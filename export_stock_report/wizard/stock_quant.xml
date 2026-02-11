@@ -6,7 +6,7 @@
         <form string="Stock Report Wizard">
             <group>
             <field name="warehouse_ids" widget="many2many_tags"/>
-            <field name="sales_person_ids" widget="many2many_tags"/>
+            <field name="sales_person_ids" widget="many2many_tags" invisible="kategori_selection == 'fuel'"/>
             <field name="kategori_selection"/>
             <field name="end_date"/>
             </group>
