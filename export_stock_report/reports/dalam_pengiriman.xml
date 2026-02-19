@@ -100,7 +100,7 @@
                       <td style="border:1px solid #000;">
                         <t t-esc="('{:,.0f}'.format(tline['total_box'])).replace(',', '.')"/>
                       </td>
-                      <td>
+                      <td style="text-align:left;border:1px solid #000;">
                         <t t-esc="('{:,.2f}'.format(tline['total_cont']))
                           .replace(',', 'X').replace('.', ',').replace('X', '.')"/>
                       </td>

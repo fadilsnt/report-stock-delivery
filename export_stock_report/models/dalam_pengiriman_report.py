@@ -17,7 +17,7 @@ class ReportDalamPengiriman(models.AbstractModel):
         domain = [
             ('picking_type_code', '=', 'internal'),
             ('state', '=', 'assigned'),  # hanya status "Ready"
-            ('scheduled_date', '<=', wizard.end_date),
+            ('scheduled_date', '=', wizard.end_date),
         ]
 
         # ===== Tambahkan filter warehouse jika dipilih =====

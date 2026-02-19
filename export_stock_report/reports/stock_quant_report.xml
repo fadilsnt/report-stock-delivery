@@ -46,7 +46,6 @@
 
                                         <t t-foreach="products.items()" t-as="prod">
                                             <tr>
-                                                <!-- WAREHOUSE SELALU MUNCUL -->
                                                 <td style="border:1px solid black; padding:6px;">
                                                     <t t-esc="warehouse"/>
                                                 </td>
@@ -56,15 +55,15 @@
                                                 </td>
 
                                                 <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                    <t t-esc="prod[1]['box'] if prod[1]['box'] else '-'"/>
+                                                    <t t-esc="('{:,.0f}'.format(prod[1]['box'])).replace(',', '.') if prod[1]['box'] else '-'"/>
                                                 </td>
 
                                                 <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                    <t t-esc="prod[1]['kg'] if prod[1]['kg'] else '-'"/>
+                                                    <t t-esc="('{:,.0f}'.format(prod[1]['kg'])).replace(',', '.') if prod[1]['kg'] else '-'"/>
                                                 </td>
 
                                                 <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                    <t t-esc="('%.2f' % prod[1]['cont']) if prod[1]['cont'] else '-'"/>
+                                                    <t t-esc="('{:,.0f}'.format(prod[1]['cont'])).replace(',', '.') if prod[1]['cont'] else '-'"/>
                                                 </td>
                                             </tr>
                                         </t>
@@ -76,13 +75,13 @@
                                             TOTAL
                                         </td>
                                         <td style="border:1px solid black; padding:6px; text-align:right;">
-                                            <t t-esc="warehouse_totals['box']"/>
+                                            <t t-esc="('{:,.0f}'.format(warehouse_totals['box'])).replace(',', '.')"/>
                                         </td>
                                         <td style="border:1px solid black; padding:6px; text-align:right;">
-                                            <t t-esc="warehouse_totals['kg']"/>
+                                            <t t-esc="('{:,.0f}'.format(warehouse_totals['kg'])).replace(',', '.')"/>
                                         </td>
                                         <td style="border:1px solid black; padding:6px; text-align:right;">
-                                            <t t-esc="('%.2f' % warehouse_totals['cont'])"/>
+                                            <t t-esc="('{:,.0f}'.format(warehouse_totals['cont'])).replace(',', '.')"/>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -99,24 +98,22 @@
                                 </thead>
                                 <tbody>
 
-                                    <!-- BARIS PER DESIGN -->
                                     <t t-foreach="product_totals.items()" t-as="p">
                                         <tr>
                                             <td class="text-start" style="border:1px solid black; padding:4px; text-align:left;">
                                                 <t t-esc="p[0]"/>
                                             </td>
-                                            <td class="text-end" style="border:1px solid black; padding:4px; text-align:left;">
-                                                <t t-esc="round(p[1]['cont'], 2)"/>
+                                            <td class="text-end" style="border:1px solid black; padding:4px; text-align:right;">
+                                                <t t-esc="('{:,.0f}'.format(p[1]['cont'])).replace(',', '.')"/>
                                             </td>
                                             <td style="border:1px solid black; padding:4px; text-align:left;">CONT</td>
                                         </tr>
                                     </t>
 
-                                    <!-- TOTAL -->
                                     <tr class="fw-bold">
                                         <td style="border:1px solid black; padding:4px; text-align:left;">TOTAL</td>
-                                        <td class="text-end" style="border:1px solid black; padding:4px;">
-                                            <t t-esc="round(grand_total_cont, 2)"/>
+                                        <td class="text-end" style="border:1px solid black; padding:4px; text-align:right;">
+                                            <t t-esc="('{:,.0f}'.format(grand_total_cont)).replace(',', '.')"/>
                                         </td>
                                         <td style="border:1px solid black; padding:4px; text-align:left;">CONT</td>
                                     </tr>
@@ -125,6 +122,7 @@
                             </table>
 
                         </td>
+
                         <!-- ================= MIDDLE : JUMBO BAG ================= -->
                         <td style="width:50%; vertical-align:top; padding-right:10px;">
 
@@ -154,15 +152,15 @@
                                             </td>
 
                                             <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                <t t-esc="row[1]['box'] if row[1]['box'] else '-'"/>
+                                                <t t-esc="('{:,.0f}'.format(row[1]['box'])).replace(',', '.') if row[1]['box'] else '-'"/>
                                             </td>
 
                                             <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                <!-- <t t-esc="row[1]['kg'] if row[1]['kg'] else '-'"/> --> -
+                                                -
                                             </td>
 
                                             <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                <!-- <t t-esc="('%.2f' % row[1]['cont']) if row[1]['cont'] else '-'"/> --> -
+                                                -
                                             </td>
                                         </tr>
                                         <tr style="font-weight:bold; background:#f2f2f2;">
@@ -171,15 +169,15 @@
                                             </td>
 
                                             <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                <t t-esc="jumbo_totals['box'] if jumbo_totals['box'] else '-'"/>
+                                                <t t-esc="('{:,.0f}'.format(jumbo_totals['box'])).replace(',', '.') if jumbo_totals['box'] else '-'"/>
                                             </td>
 
                                             <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                <t t-esc="jumbo_totals['kg'] if jumbo_totals['kg'] else '-'"/>
+                                                <t t-esc="('{:,.0f}'.format(jumbo_totals['kg'])).replace(',', '.') if jumbo_totals['kg'] else '-'"/>
                                             </td>
 
                                             <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                <t t-esc="('%.2f' % jumbo_totals['cont']) if jumbo_totals['cont'] else '-'"/>
+                                                <t t-esc="('{:,.0f}'.format(jumbo_totals['cont'])).replace(',', '.') if jumbo_totals['cont'] else '-'"/>
                                             </td>
                                         </tr>
 
@@ -198,11 +196,11 @@
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th style="border:1px solid black;">KRG 20 KG</th>
-                                        <th style="border:1px solid black;">KRG 550 KG</th>
-                                        <th style="border:1px solid black;">KRG 600 KG</th>
-                                        <th style="border:1px solid black;">KG</th>
-                                        <th style="border:1px solid black;">CONT</th>
+                                        <th style="border:1px solid black; padding:6px;">KRG 20 KG</th>
+                                        <th style="border:1px solid black; padding:6px;">KRG 550 KG</th>
+                                        <th style="border:1px solid black; padding:6px;">KRG 600 KG</th>
+                                        <th style="border:1px solid black; padding:6px;">KG</th>
+                                        <th style="border:1px solid black; padding:6px;">CONT</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -214,52 +212,46 @@
 
                                             <t t-set="qty_20" t-value="row[1]['variants']['KRG 20 KG']"/>
 
-                                            <td style="border:1px solid black; padding:6px;">
-                                                <t t-esc="qty_20 if qty_20 else '-'"/>
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <t t-esc="('{:,.0f}'.format(qty_20)).replace(',', '.') if qty_20 else '-'"/>
                                             </td>
                                             <td style="border:1px solid black; padding:6px;">
-                                                -   <!-- KRG 550 KG -->
+                                                -
                                             </td>
                                             <td style="border:1px solid black; padding:6px;">
-                                                -   <!-- KRG 600 KG -->
+                                                -
                                             </td>
 
-                                            <td style="border:1px solid black; padding:6px;">
-                                                <t t-esc="(qty_20 * 20) if qty_20 else '-'"/>
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <t t-esc="('{:,.0f}'.format(qty_20 * 20)).replace(',', '.') if qty_20 else '-'"/>
                                             </td>
-                                            <td style="border:1px solid black; padding:6px;">
-                                                <t t-esc="('%.2f' % ((qty_20 * 20) / 2400)) if qty_20 else '-'"/>
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <t t-esc="('{:,.0f}'.format((qty_20 * 20) / 2400)).replace(',', '.') if qty_20 else '-'"/>
                                             </td>
                                         </tr>
                                     </t>
                                     <t t-set="total_qty_20" t-value="scrap_totals['qty_20']"/>
 
-                                        <tr style="font-weight:bold; background:#f2f2f2;">
-                                            <td style="border:1px solid black; padding:6px;">
-                                                TOTAL
-                                            </td>
+                                    <tr style="font-weight:bold; background:#f2f2f2;">
+                                        <td style="border:1px solid black; padding:6px;">
+                                            TOTAL
+                                        </td>
 
-                                            <!-- KRG 20 KG -->
-                                            <td style="border:1px solid black; text-align:right;">
-                                                <t t-esc="total_qty_20 if total_qty_20 else '-'"/>
-                                            </td>
+                                        <td style="border:1px solid black; text-align:right;">
+                                            <t t-esc="('{:,.0f}'.format(total_qty_20)).replace(',', '.') if total_qty_20 else '-'"/>
+                                        </td>
 
-                                            <!-- KRG 550 KG -->
-                                            <td style="border:1px solid black; text-align:center;">-</td>
+                                        <td style="border:1px solid black; text-align:center;">-</td>
+                                        <td style="border:1px solid black; text-align:center;">-</td>
 
-                                            <!-- KRG 600 KG -->
-                                            <td style="border:1px solid black; text-align:center;">-</td>
+                                        <td style="border:1px solid black; text-align:right;">
+                                            <t t-esc="('{:,.0f}'.format(total_qty_20 * 20)).replace(',', '.') if total_qty_20 else '-'"/>
+                                        </td>
 
-                                            <!-- TOTAL KG -->
-                                            <td style="border:1px solid black; text-align:right;">
-                                                <t t-esc="(total_qty_20 * 20) if total_qty_20 else '-'"/>
-                                            </td>
-
-                                            <!-- TOTAL CONT -->
-                                            <td style="border:1px solid black; text-align:right;">
-                                                <t t-esc="('%.2f' % ((total_qty_20 * 20) / 2400)) if total_qty_20 else '-'"/>
-                                            </td>
-                                        </tr>
+                                        <td style="border:1px solid black; text-align:right;">
+                                            <t t-esc="('{:,.0f}'.format((total_qty_20 * 20) / 2400)).replace(',', '.') if total_qty_20 else '-'"/>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </td>
