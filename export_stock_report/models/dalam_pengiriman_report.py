@@ -3,6 +3,7 @@ from collections import defaultdict
 import time
 import re
 import random
+from datetime import datetime, time
 
 
 class ReportDalamPengiriman(models.AbstractModel):
@@ -12,12 +13,15 @@ class ReportDalamPengiriman(models.AbstractModel):
     @api.model
     def _get_report_values(self, docids, data=None):
         wizard = self.env['pengiriman.report.wizard'].browse(docids)
+        start = datetime.combine(wizard.end_date, time.min)
+        end = datetime.combine(wizard.end_date, time.max)
 
         # ===== Domain picking: hanya internal & ready =====
         domain = [
             ('picking_type_code', '=', 'internal'),
             ('state', '=', 'assigned'),  # hanya status "Ready"
-            ('scheduled_date', '=', wizard.end_date),
+            ('scheduled_date', '>=', start),
+            ('scheduled_date', '<=', end),
         ]
 
         # ===== Tambahkan filter warehouse jika dipilih =====

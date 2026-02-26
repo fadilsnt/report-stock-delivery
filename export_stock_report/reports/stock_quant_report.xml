@@ -63,7 +63,10 @@
                                                 </td>
 
                                                 <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                    <t t-esc="('{:,.0f}'.format(prod[1]['cont'])).replace(',', '.') if prod[1]['cont'] else '-'"/>
+                                                    <span t-esc="
+                                                        '{:,.2f}'.format(prod[1]['cont']).replace(',', 'X').replace('.', ',').replace('X', '.')
+                                                        if prod[1]['cont'] else '-'
+                                                    "/>
                                                 </td>
                                             </tr>
                                         </t>
@@ -81,7 +84,10 @@
                                             <t t-esc="('{:,.0f}'.format(warehouse_totals['kg'])).replace(',', '.')"/>
                                         </td>
                                         <td style="border:1px solid black; padding:6px; text-align:right;">
-                                            <t t-esc="('{:,.0f}'.format(warehouse_totals['cont'])).replace(',', '.')"/>
+                                           
+                                            <span t-esc="
+                                                        '{:,.2f}'.format(warehouse_totals['cont']).replace(',', 'X').replace('.', ',').replace('X', '.')
+                                                    "/>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -104,16 +110,20 @@
                                                 <t t-esc="p[0]"/>
                                             </td>
                                             <td class="text-end" style="border:1px solid black; padding:4px; text-align:right;">
-                                                <t t-esc="('{:,.0f}'.format(p[1]['cont'])).replace(',', '.')"/>
+                                                <span t-esc="
+                                                        '{:,.2f}'.format(p[1]['cont']).replace(',', 'X').replace('.', ',').replace('X', '.')
+                                                    "/>
                                             </td>
                                             <td style="border:1px solid black; padding:4px; text-align:left;">CONT</td>
                                         </tr>
                                     </t>
 
-                                    <tr class="fw-bold">
+                                    <tr class="fw-bold" style="font-weight:bold;">
                                         <td style="border:1px solid black; padding:4px; text-align:left;">TOTAL</td>
                                         <td class="text-end" style="border:1px solid black; padding:4px; text-align:right;">
-                                            <t t-esc="('{:,.0f}'.format(grand_total_cont)).replace(',', '.')"/>
+                                            <span t-esc="
+                                                        '{:,.2f}'.format(grand_total_cont).replace(',', 'X').replace('.', ',').replace('X', '.')
+                                                    "/>
                                         </td>
                                         <td style="border:1px solid black; padding:4px; text-align:left;">CONT</td>
                                     </tr>
