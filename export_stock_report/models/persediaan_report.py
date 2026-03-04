@@ -315,16 +315,35 @@ class ReportStockWarehouse(models.AbstractModel):
                 ('state', 'not in', ['draft', 'cancel']),
                 ('date', '<=', wizard.end_date),
                 ('location_dest_id.warehouse_id', 'in',
-                wizard.warehouse_ids.ids or self.env['stock.warehouse'].search([]).ids),
+                    wizard.warehouse_ids.ids or self.env['stock.warehouse'].search([]).ids),
             ]
 
             move_lines = self.env['stock.move.line'].search(move_domain)
 
-            results = defaultdict(lambda: defaultdict(lambda: {
-                "box": 0.0,
+            # ==============================
+            # STRUCTURE
+            # ==============================
+            # results[warehouse][design] = {
+            #     "boxes": {8: 2, 10: 1},
+            #     "kg": 100,
+            #     "cont": 2.5
+            # }
+
+            results = defaultdict(
+                lambda: defaultdict(
+                    lambda: {
+                        "boxes": defaultdict(float),
+                        "kg": 0.0,
+                        "cont": 0.0,
+                    }
+                )
+            )
+
+            warehouse_totals = {
+                "boxes": defaultdict(float),
                 "kg": 0.0,
-                "cont": 0.0
-            }))
+                "cont": 0.0,
+            }
 
             product_totals = defaultdict(lambda: {
                 "box": 0.0,
@@ -332,19 +351,20 @@ class ReportStockWarehouse(models.AbstractModel):
                 "cont": 0.0
             })
 
-            grand_total_cont = 0.0
-
-
-            warehouse_totals = {"box": 0.0, "kg": 0.0, "cont": 0.0}
-            grand_total_cont = 0.0
+            all_weights = set()
             seen = set()
 
+            # ==============================
+            # LOOP
+            # ==============================
             for line in move_lines:
+
                 wh = line.location_dest_id.warehouse_id
                 if not wh:
                     continue
 
                 product = line.product_id
+
                 if (product.categ_id.name or "").lower() != "fuel":
                     continue
 
@@ -363,34 +383,48 @@ class ReportStockWarehouse(models.AbstractModel):
                 ]
                 qty = sum(self.env['stock.quant'].search(quant_domain).mapped('quantity'))
 
+                if not qty:
+                    continue
+
                 design_name, kg_per_box, cont_value = self._get_fuel_variant_values(product)
 
                 box = qty
 
-                # KG dari UoM
+                # ==================
+                # KG
+                # ==================
                 uom_ratio = line.product_uom_id.ratio if line.product_uom_id else 1
                 kg = box * uom_ratio
 
-                # CONT dari kapasitas
-                cont_var = self._get_cont_capacity(product)
-                cont = box / cont_var if cont_var else 0.0
+                # ==================
+                # CONT
+                # ==================
+                cont_capacity = self._get_cont_capacity(product)
+                cont = box / cont_capacity if cont_capacity else 0.0
 
-                # Simpan per warehouse & design
-                results[wh.name][design_name]["box"] = box
-                results[wh.name][design_name]["kg"] = kg
-                results[wh.name][design_name]["cont"] = cont
+                # ==================
+                # SIMPAN PER DESIGN
+                # ==================
+                results[wh.name][design_name]["boxes"][kg_per_box] += box
+                results[wh.name][design_name]["kg"] += kg
+                results[wh.name][design_name]["cont"] += cont
+
+                # ==================
+                # TOTAL SEMUA
+                # ==================
 
                 # Total per produk
                 product_totals[design_name]["box"] += box
                 product_totals[design_name]["kg"] += kg
                 product_totals[design_name]["cont"] += cont
-
-                # Total keseluruhan
-                warehouse_totals["box"] += box
+                
+                warehouse_totals["boxes"][kg_per_box] += box
                 warehouse_totals["kg"] += kg
                 warehouse_totals["cont"] += cont
 
-                grand_total_cont += cont
+                all_weights.add(kg_per_box)
+
+            all_weights = sorted(all_weights)
 
              
             #product fuel jumbo bag 
@@ -514,7 +548,8 @@ class ReportStockWarehouse(models.AbstractModel):
                 "scrap_results": scrap_results,
                 "scrap_totals": scrap_totals,
                 "product_totals": product_totals,
-                "grand_total_cont": grand_total_cont,
+                "grand_total_cont": warehouse_totals["cont"],
+                "all_weights": all_weights,
             }
         
 

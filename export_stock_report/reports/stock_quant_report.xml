@@ -28,14 +28,22 @@
                                         <th rowspan="2" style="border:1px solid black; padding:6px;">
                                             DESIGN
                                         </th>
-                                        <th colspan="3" style="border:1px solid black; padding:6px;">
+                                        <th t-att-colspan="len(all_weights)" style="border:1px solid black; padding:6px;">
                                             BOX FUEL
+                                        </th>
+                                        <th rowspan="2" style="border:1px solid black; padding:6px;">
+                                            KG
+                                        </th>
+                                        <th rowspan="2" style="border:1px solid black; padding:6px;">
+                                            CONT
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th style="border:1px solid black; padding:6px;">BOX</th>
-                                        <th style="border:1px solid black; padding:6px;">KG</th>
-                                        <th style="border:1px solid black; padding:6px;">CONT</th>
+                                        <t t-foreach="all_weights" t-as="w">
+                                            <th style="border:1px solid black; padding:6px;">
+                                                BOX <t t-esc="w"/> KG
+                                            </th>
+                                        </t>
                                     </tr>
                                 </thead>
 
@@ -54,17 +62,26 @@
                                                     <t t-esc="prod[0]"/>
                                                 </td>
 
-                                                <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                    <t t-esc="('{:,.0f}'.format(prod[1]['box'])).replace(',', '.') if prod[1]['box'] else '-'"/>
-                                                </td>
+                                                <!-- BOX DINAMIS -->
+                                                <t t-foreach="all_weights" t-as="w">
+                                                    <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                        <t t-set="val" t-value="prod[1]['boxes'].get(w, 0)"/>
+                                                        <t t-esc="('{:,.0f}'.format(val)).replace(',', '.') if val else '-'"/>
+                                                    </td>
+                                                </t>
 
+                                                <!-- KG -->
                                                 <td style="border:1px solid black; padding:6px; text-align:right;">
                                                     <t t-esc="('{:,.0f}'.format(prod[1]['kg'])).replace(',', '.') if prod[1]['kg'] else '-'"/>
                                                 </td>
 
+                                                <!-- CONT -->
                                                 <td style="border:1px solid black; padding:6px; text-align:right;">
-                                                    <span t-esc="
-                                                        '{:,.2f}'.format(prod[1]['cont']).replace(',', 'X').replace('.', ',').replace('X', '.')
+                                                    <t t-esc="
+                                                        '{:,.2f}'.format(prod[1]['cont'])
+                                                        .replace(',', 'X')
+                                                        .replace('.', ',')
+                                                        .replace('X', '.')
                                                         if prod[1]['cont'] else '-'
                                                     "/>
                                                 </td>
@@ -77,17 +94,28 @@
                                         <td colspan="2" style="border:1px solid black; padding:6px;">
                                             TOTAL
                                         </td>
-                                        <td style="border:1px solid black; padding:6px; text-align:right;">
-                                            <t t-esc="('{:,.0f}'.format(warehouse_totals['box'])).replace(',', '.')"/>
-                                        </td>
+
+                                        <!-- TOTAL BOX PER BERAT -->
+                                        <t t-foreach="all_weights" t-as="w">
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <t t-set="val" t-value="warehouse_totals['boxes'].get(w, 0)"/>
+                                                <t t-esc="('{:,.0f}'.format(val)).replace(',', '.') if val else '-'"/>
+                                            </td>
+                                        </t>
+
+                                        <!-- TOTAL KG -->
                                         <td style="border:1px solid black; padding:6px; text-align:right;">
                                             <t t-esc="('{:,.0f}'.format(warehouse_totals['kg'])).replace(',', '.')"/>
                                         </td>
+
+                                        <!-- TOTAL CONT -->
                                         <td style="border:1px solid black; padding:6px; text-align:right;">
-                                           
-                                            <span t-esc="
-                                                        '{:,.2f}'.format(warehouse_totals['cont']).replace(',', 'X').replace('.', ',').replace('X', '.')
-                                                    "/>
+                                            <t t-esc="
+                                                '{:,.2f}'.format(warehouse_totals['cont'])
+                                                .replace(',', 'X')
+                                                .replace('.', ',')
+                                                .replace('X', '.')
+                                            "/>
                                         </td>
                                     </tr>
                                 </tbody>
